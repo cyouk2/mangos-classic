@@ -837,7 +837,7 @@ void Creature::LoadBotMenu(Player* pPlayer)
     }
     while (result->NextRow());
     delete result;*/
-	QueryResult* result = WorldDatabase.Query("SELECT id, name FROM mangos.areatrigger_teleport where required_level > 44 and target_map > 0");
+	QueryResult* result = WorldDatabase.Query("SELECT id, name FROM areatrigger_teleport where required_level > 44 and target_map > 0");
 	
     do
     {
