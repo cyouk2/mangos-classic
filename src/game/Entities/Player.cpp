@@ -11038,7 +11038,10 @@ void Player::PrepareGossipMenu(WorldObject* pSource, uint32 menuId)
                     std::string reqQuestIds = botConfig.GetStringDefault("PlayerbotAI.BotguyQuests", "");
                     uint32 cost = botConfig.GetIntDefault("PlayerbotAI.BotguyCost", 0);
                     if ((reqQuestIds == "" || requiredQuests(reqQuestIds.c_str())) && !pCreature->isInnkeeper() && this->GetMoney() >= cost)
+					{
                         pCreature->LoadBotMenu(this);
+						//pCreature->LoadTransportMenu(this);
+					}
 #endif
                     hasMenuItem = false;
                     break;
@@ -11286,6 +11289,23 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId)
             // DEBUG_LOG("GOSSIP_OPTION_BOT");
             PlayerTalkClass->CloseGossip();
             uint32 guidlo = PlayerTalkClass->GossipOptionSender(gossipListId);
+			
+			this->TeleportTo(229, 78.3534f, -226.841f, 49.7662f, 4.71239f);
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			/*
+			
+			
+			
             uint32 cost = botConfig.GetIntDefault("PlayerbotAI.BotguyCost", 0);
 
             if (!GetPlayerbotMgr())
@@ -11331,7 +11351,7 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId)
 
                 GetPlayerbotMgr()->LoginPlayerBot(ObjectGuid(HIGHGUID_PLAYER, guidlo));
                 this->ModifyMoney(-(int32)cost);
-            }
+            }*/
             return;
         }
 #endif
