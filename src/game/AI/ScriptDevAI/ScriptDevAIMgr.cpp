@@ -353,9 +353,20 @@ bool ScriptDevAIMgr::OnItemUse(Player* pPlayer, Item* pItem, SpellCastTargets co
 
     if (!pTempScript || !pTempScript->pItemUse)
         return false;
-
+	pPlayer->PlayerTalkClass->ClearMenus();
     return pTempScript->pItemUse(pPlayer, pItem, targets);
 }
+
+bool ScriptDevAIMgr::OnGossipSelect_Item(Player* pPlayer, Item* pItem, SpellCastTargets const& targets)
+{
+	pPlayer->PlayerTalkClass->ClearMenus();
+    Script* pTempScript = GetScript(pItem->GetProto()->ScriptId);
+    if (!pTempScript || !pTempScript->pGossipSelect_Item)
+        return false;
+
+    return pTempScript->pGossipSelect_Item(pPlayer, pItem, targets);
+}
+
 
 bool ScriptDevAIMgr::OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, Creature* pTarget, ObjectGuid originalCasterGuid)
 {
