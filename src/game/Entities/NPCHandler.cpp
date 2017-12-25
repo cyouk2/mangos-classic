@@ -386,7 +386,8 @@ void WorldSession::HandleGossipSelectOptionOpcode(WorldPacket& recv_data)
 			DEBUG_LOG("WORLD: HandleGossipSelectOptionOpcode - %s not found or you can't interact with it.", guid.GetString().c_str());
             return;
 		}
-		if (!sScriptDevAIMgr.OnGossipSelect_Item(_player, pItem, sender, action, nullptr))
+		SpellCastTargets targets;
+		if (!sScriptDevAIMgr.OnGossipSelect_Item(_player, pItem, sender, action, &targets))
 		{
 			
 		}
