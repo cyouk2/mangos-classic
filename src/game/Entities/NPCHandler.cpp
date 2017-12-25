@@ -387,7 +387,7 @@ void WorldSession::HandleGossipSelectOptionOpcode(WorldPacket& recv_data)
             return;
 		}
 		SpellCastTargets targets;
-		if (!sScriptDevAIMgr.OnGossipSelect_Item(_player, pItem, sender, action, &targets))
+		if (!sScriptDevAIMgr.OnGossipSelect_Item(_player, pItem, sender, action, targets))
 		{
 			
 		}
