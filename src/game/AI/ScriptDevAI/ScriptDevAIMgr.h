@@ -128,7 +128,7 @@ class ScriptDevAIMgr
         uint32 GetDialogStatus(const Player* pPlayer, const GameObject* pGameObject) const;
         bool OnGameObjectUse(Player* pPlayer, GameObject* pGameObject);
         bool OnItemUse(Player* pPlayer, Item* pItem, SpellCastTargets const& targets);
-		bool OnGossipSelect_Item(Player* pPlayer, Item* pItem, SpellCastTargets const& targets);
+		bool OnGossipSelect_Item(Player* pPlayer, Item* pItem, uint32 sender, uint32 action, SpellCastTargets const& targets);
 		
         bool OnAreaTrigger(Player* pPlayer, AreaTriggerEntry const* atEntry);
         bool OnProcessEvent(uint32 eventId, Object* pSource, Object* pTarget, bool isStart);
