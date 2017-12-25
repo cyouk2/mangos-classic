@@ -357,14 +357,14 @@ bool ScriptDevAIMgr::OnItemUse(Player* pPlayer, Item* pItem, SpellCastTargets co
     return pTempScript->pItemUse(pPlayer, pItem, targets);
 }
 
-bool ScriptDevAIMgr::OnGossipSelect_Item(Player* pPlayer, Item* pItem, SpellCastTargets const& targets)
+bool ScriptDevAIMgr::OnGossipSelect_Item(Player* pPlayer, Item* pItem, uint32 sender, uint32 action, SpellCastTargets const& targets)
 {
 	pPlayer->PlayerTalkClass->ClearMenus();
     Script* pTempScript = GetScript(pItem->GetProto()->ScriptId);
     if (!pTempScript || !pTempScript->pGossipSelect_Item)
         return false;
 
-    return pTempScript->pGossipSelect_Item(pPlayer, pItem, targets);
+    return pTempScript->pGossipSelect_Item(pPlayer, pItem, sender, action, targets);
 }
 
 
