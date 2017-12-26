@@ -11289,7 +11289,7 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId)
             // DEBUG_LOG("GOSSIP_OPTION_BOT");
             PlayerTalkClass->CloseGossip();
             uint32 guidlo = PlayerTalkClass->GossipOptionSender(gossipListId);
-			QueryResult* resultchar = WorldDatabase.PQuery("SELECT target_map, target_position_x, target_position_y, target_position_z, target_orientation FROM areatrigger_teleport_my where id = '%u' limit 1", guidlo);
+			/*QueryResult* resultchar = WorldDatabase.PQuery("SELECT target_map, target_position_x, target_position_y, target_position_z, target_orientation FROM areatrigger_teleport_my where id = '%u' limit 1", guidlo);
 			if (resultchar){
 				Field* fields = resultchar->Fetch();
 				int mapid = fields[0].GetUInt16();
@@ -11301,8 +11301,8 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId)
 				//this->TeleportTo(229, 78.3534f, -226.841f, 49.7662f, 4.71239f);
 			}
 			delete resultchar;
+			*/
 			
-			/*
             uint32 cost = botConfig.GetIntDefault("PlayerbotAI.BotguyCost", 0);
 
             if (!GetPlayerbotMgr())
@@ -11348,7 +11348,7 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId)
 
                 GetPlayerbotMgr()->LoginPlayerBot(ObjectGuid(HIGHGUID_PLAYER, guidlo));
                 this->ModifyMoney(-(int32)cost);
-            }*/
+            }
             return;
         }
 #endif
