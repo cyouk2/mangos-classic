@@ -797,7 +797,7 @@ void PlayerbotMgr::RemoveAllBotsFromGroup()
 
 void Creature::LoadBotMenu(Player* pPlayer)
 {
-/*
+
     if (pPlayer->GetPlayerbotAI()) return;
     ObjectGuid guid = pPlayer->GetObjectGuid();
     uint32 accountId = sObjectMgr.GetPlayerAccountIdByGUID(guid);
@@ -836,38 +836,21 @@ void Creature::LoadBotMenu(Player* pPlayer)
         }
     }
     while (result->NextRow());
+    delete result;
+	/*QueryResult* result = WorldDatabase.Query("SELECT id, name FROM areatrigger_teleport_my");
+	
+    do
+    {
+        Field* fields = result->Fetch();
+       
+        uint32 eventId = fields[0].GetUInt32();
+        std::string scriptName = fields[1].GetString();
+		pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem((uint8) 9, scriptName, eventId, GOSSIP_OPTION_BOT, scriptName, false);  
+    }
+    while (result->NextRow());
     delete result;*/
-	QueryResult* result = WorldDatabase.Query("SELECT id, name FROM areatrigger_teleport_my");
-	
-    do
-    {
-        Field* fields = result->Fetch();
-       
-        uint32 eventId = fields[0].GetUInt32();
-        std::string scriptName = fields[1].GetString();
-		pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem((uint8) 9, scriptName, eventId, GOSSIP_OPTION_BOT, scriptName, false);  
-    }
-    while (result->NextRow());
-    delete result;
 }
-/*
-void Creature::LoadTransportMenu(Player* pPlayer)
-{
-	
-	QueryResult* result = WorldDatabase.Query("SELECT id, name FROM mangos.areatrigger_teleport where required_level > 44 and target_map > 0");
-	
-    do
-    {
-        Field* fields = result->Fetch();
-       
-        uint32 eventId = fields[0].GetUInt32();
-        std::string scriptName = fields[1].GetString();
-		pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem((uint8) 9, scriptName, eventId, GOSSIP_OPTION_BOT, scriptName, false);  
-    }
-    while (result->NextRow());
-    delete result;
-}
-*/
+
 void Player::skill(std::list<uint32>& m_spellsToLearn)
 {
     for (SkillStatusMap::const_iterator itr = mSkillStatus.begin(); itr != mSkillStatus.end(); ++itr)
