@@ -46,7 +46,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
         recvPacket.rpos(recvPacket.wpos());                 // prevent spam at not read packet tail
         return;
     }
-
+	sLog.outError("WORLD::OpenItem: item [guid = %u] 1", pItem->GetGUIDLow());
     Item* pItem = pUser->GetItemByPos(bagIndex, slot);
     if (!pItem)
     {
@@ -56,7 +56,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
     }
 
     DETAIL_LOG("WORLD: CMSG_USE_ITEM packet, bagIndex: %u, slot: %u, spell_count: %u , Item: %u, data length = %u", bagIndex, slot, spell_count, pItem->GetEntry(), (uint32)recvPacket.size());
-
+	sLog.outError("WORLD::OpenItem: item [guid = %u] 2", pItem->GetGUIDLow());
     ItemPrototype const* proto = pItem->GetProto();
     if (!proto)
     {
@@ -64,7 +64,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
         pUser->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, pItem, nullptr);
         return;
     }
-
+	sLog.outError("WORLD::OpenItem: item [guid = %u] 3", pItem->GetGUIDLow());
     // some item classes can be used only in equipped state
     if (proto->InventoryType != INVTYPE_NON_EQUIP && !pItem->IsEquipped())
     {
@@ -72,7 +72,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
         pUser->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, pItem, nullptr);
         return;
     }
-
+	sLog.outError("WORLD::OpenItem: item [guid = %u] 4", pItem->GetGUIDLow());
     InventoryResult msg = pUser->CanUseItem(pItem);
     if (msg != EQUIP_ERR_OK)
     {
@@ -80,7 +80,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
         pUser->SendEquipError(msg, pItem, nullptr);
         return;
     }
-
+	sLog.outError("WORLD::OpenItem: item [guid = %u] 5", pItem->GetGUIDLow());
     // not allow use item from trade (cheat way only)
     if (pItem->IsInTrade())
     {
@@ -88,7 +88,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
         pUser->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, pItem, nullptr);
         return;
     }
-
+	sLog.outError("WORLD::OpenItem: item [guid = %u] 6", pItem->GetGUIDLow());
     if (pUser->isInCombat())
     {
         for (int i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
@@ -104,7 +104,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
             }
         }
     }
-
+	sLog.outError("WORLD::OpenItem: item [guid = %u] 7", pItem->GetGUIDLow());
     // check also  BIND_WHEN_PICKED_UP and BIND_QUEST_ITEM for .additem or .additemset case by GM (not binded at adding to inventory)
     if (pItem->GetProto()->Bonding == BIND_WHEN_USE || pItem->GetProto()->Bonding == BIND_WHEN_PICKED_UP || pItem->GetProto()->Bonding == BIND_QUEST_ITEM)
     {
@@ -114,7 +114,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
             pItem->SetBinding(true);
         }
     }
-
+	sLog.outError("WORLD::OpenItem: item [guid = %u] 8", pItem->GetGUIDLow());
     SpellCastTargets targets;
 
     recvPacket >> targets.ReadForCaster(pUser);
@@ -142,13 +142,15 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
             Spell::SendCastResult(_player, spellInfo, SPELL_FAILED_BAD_TARGETS);
         return;
     }
-
+	sLog.outError("WORLD::OpenItem: item [guid = %u] 9", pItem->GetGUIDLow());
     // Note: If script stop casting it must send appropriate data to client to prevent stuck item in gray state.
     if (!sScriptDevAIMgr.OnItemUse(pUser, pItem, targets))
     {
+		sLog.outError("WORLD::OpenItem: item [guid = %u] 10", pItem->GetGUIDLow());
         // no script or script not process request by self
         pUser->CastItemUseSpell(pItem, targets);
     }
+		sLog.outError("WORLD::OpenItem: item [guid = %u] 11", pItem->GetGUIDLow());
 }
 
 #define OPEN_CHEST 11437
