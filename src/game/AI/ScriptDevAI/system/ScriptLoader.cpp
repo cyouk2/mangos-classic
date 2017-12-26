@@ -12,6 +12,7 @@ extern void AddSC_battleground();
 // examples
 extern void AddSC_example_creature();
 extern void AddSC_example_escort();
+extern void AddSC_Item_teleport();
 extern void AddSC_example_gossip_codebox();
 extern void AddSC_example_misc();
 
@@ -215,7 +216,8 @@ void AddScripts()
     AddSC_example_escort();
     AddSC_example_gossip_codebox();
     AddSC_example_misc();
-
+	AddSC_Item_teleport();
+	
     // world
     AddSC_areatrigger_scripts();
     AddSC_bosses_emerald_dragons();
