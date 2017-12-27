@@ -16,6 +16,7 @@
 
 
 #include "AI/ScriptDevAI/PreCompiledHeader.h"
+#include "Spells/Spell.h"
 #include <cstring>
 
 bool GossipHello_ItemUse_Item_teleport(Player *player, Item* _Item, SpellCastTargets const& targets)
@@ -28,6 +29,12 @@ bool GossipHello_ItemUse_Item_teleport(Player *player, Item* _Item, SpellCastTar
     player->ADD_GOSSIP_ITEM( 3, " 世界风景传送1 " , 1, GOSSIP_ACTION_INFO_DEF + 6);
     player->ADD_GOSSIP_ITEM( 3, " 世界风景传送2 " , 1, GOSSIP_ACTION_INFO_DEF + 7);
     player->SEND_GOSSIP_MENU(99990,_Item->GetObjectGuid());
+	
+	player->SendEquipError(EQUIP_ERR_NONE, _Item, NULL);
+
+	//if (const SpellEntry* pSpellInfo = GetSpellStore()->LookupEntry<SpellEntry>(SPELL_DOMINION_SOUL))
+	//	Spell::SendCastResult(pPlayer, pSpellInfo, SPELL_FAILED_TARGET_AURASTATE);
+
     return true;
 }
 
