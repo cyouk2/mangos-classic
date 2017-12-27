@@ -25,7 +25,8 @@ bool GossipHello_ItemUse_Item_teleport(Player *player, Item* _Item, SpellCastTar
     player->ADD_GOSSIP_ITEM( 3, " 中级副本传送 " , 1, GOSSIP_ACTION_INFO_DEF + 3);
     player->ADD_GOSSIP_ITEM( 3, " 团队副本传送 " , 1, GOSSIP_ACTION_INFO_DEF + 4);
     player->ADD_GOSSIP_ITEM( 3, " 野外BOSS传送 " , 1, GOSSIP_ACTION_INFO_DEF + 5);
-    player->ADD_GOSSIP_ITEM( 3, " 世界风景传送 " , 1, GOSSIP_ACTION_INFO_DEF + 6);
+    player->ADD_GOSSIP_ITEM( 3, " 世界风景传送1 " , 1, GOSSIP_ACTION_INFO_DEF + 6);
+	player->ADD_GOSSIP_ITEM( 3, " 世界风景传送2 " , 1, GOSSIP_ACTION_INFO_DEF + 7);
     player->SEND_GOSSIP_MENU(99990,_Item->GetObjectGuid());
     return true;
 }
@@ -120,15 +121,19 @@ void SendDefaultMenu_ItemUse_Item_teleport(Player *player, Item *_Item, uint32 a
             player->ADD_GOSSIP_ITEM( 0, " 梦境之树 " , 11, GOSSIP_ACTION_INFO_DEF + 6);
             player->ADD_GOSSIP_ITEM( 0, " GM之岛" , 11, GOSSIP_ACTION_INFO_DEF + 7);
             player->ADD_GOSSIP_ITEM( 0, " 海加尔山-暴雪路障 " , 11, GOSSIP_ACTION_INFO_DEF + 8);
-            player->ADD_GOSSIP_ITEM( 0, " 天涯海滩 " , 11, GOSSIP_ACTION_INFO_DEF + 9);
-            player->ADD_GOSSIP_ITEM( 0, " 安戈洛环形山 " , 11, GOSSIP_ACTION_INFO_DEF + 10);
-            player->ADD_GOSSIP_ITEM( 0, " 比吉尔的飞艇残骸 " , 11, GOSSIP_ACTION_INFO_DEF + 11);
-            player->ADD_GOSSIP_ITEM( 0, " 石堡瀑布" , 11, GOSSIP_ACTION_INFO_DEF + 12);
-            player->ADD_GOSSIP_ITEM( 0, " 地铁海底" , 11, GOSSIP_ACTION_INFO_DEF + 13);
-            player->ADD_GOSSIP_ITEM( 0, " 工程之岛" , 11, GOSSIP_ACTION_INFO_DEF + 14);
-            player->ADD_GOSSIP_ITEM( 0, " KaLaZan" , 11, GOSSIP_ACTION_INFO_DEF + 15);
-            player->ADD_GOSSIP_ITEM( 7, " 上一级菜单 " , 11, GOSSIP_ACTION_INFO_DEF + 16);
-            player->SEND_GOSSIP_MENU(99997,_Item->GetGUID());
+            player->ADD_GOSSIP_ITEM( 7, " 上一级菜单 " , 11, GOSSIP_ACTION_INFO_DEF + 9);
+			player->SEND_GOSSIP_MENU(99989,_Item->GetObjectGuid()); 
+            break;
+		case GOSSIP_ACTION_INFO_DEF + 7 :
+            player->ADD_GOSSIP_ITEM( 0, " 天涯海滩 " , 12, GOSSIP_ACTION_INFO_DEF + 1);
+            player->ADD_GOSSIP_ITEM( 0, " 安戈洛环形山 " , 12, GOSSIP_ACTION_INFO_DEF + 2);
+            player->ADD_GOSSIP_ITEM( 0, " 比吉尔的飞艇残骸 " , 12, GOSSIP_ACTION_INFO_DEF + 3);
+            player->ADD_GOSSIP_ITEM( 0, " 石堡瀑布" , 12, GOSSIP_ACTION_INFO_DEF + 4);
+            player->ADD_GOSSIP_ITEM( 0, " 地铁海底" , 12, GOSSIP_ACTION_INFO_DEF + 5);
+            player->ADD_GOSSIP_ITEM( 0, " 工程之岛" , 12, GOSSIP_ACTION_INFO_DEF + 6);
+            player->ADD_GOSSIP_ITEM( 0, " KaLaZan" , 12, GOSSIP_ACTION_INFO_DEF + 7);
+            player->ADD_GOSSIP_ITEM( 7, " 上一级菜单 " , 12, GOSSIP_ACTION_INFO_DEF + 8);
+            player->SEND_GOSSIP_MENU(99997,_Item->GetObjectGuid());
         break;
     }
 }
@@ -396,35 +401,43 @@ bool GossipSelect_ItemUse_Item_teleport(Player *player, Item *_Item, uint32 send
                 case GOSSIP_ACTION_INFO_DEF + 8 :
                     player->TeleportTo(1,5478.060059,-3730.850098,1593.439941,5.610376);
                     break;
+				case GOSSIP_ACTION_INFO_DEF + 9 :
+                    GossipHello_ItemUse_Item_teleport(player,_Item,targets);
+                    break;
+			}
+            player->CLOSE_GOSSIP_MENU();
+            break;
+        case 12 :
+            switch(action) {
                 //天涯海灘 統一格式?明：(MapID, X, Y, Z, 0);
-                case GOSSIP_ACTION_INFO_DEF + 9 :
+                case GOSSIP_ACTION_INFO_DEF + 1 :
                     player->TeleportTo(1,-9851.617188,-3608.474121,8.939731,2.513388);
                     break;
                 //安戈洛環形山 統一格式?明：(MapID, X, Y, Z, 0);
-                case GOSSIP_ACTION_INFO_DEF + 10 :
+                case GOSSIP_ACTION_INFO_DEF + 2 :
                     player->TeleportTo(1,-8562.096680,-2106.056641,8.852538,0.090425);
                     break;
                 //比吉爾的飛艇殘骸 統一格式?明：(MapID, X, Y, Z, 0);
-                case GOSSIP_ACTION_INFO_DEF + 11 :
+                case GOSSIP_ACTION_INFO_DEF + 3 :
                     player->TeleportTo(1,-4014.003418,-3768.186523,42.123295,5.220697);
                     break;
                 //石堡瀑布 統一格式?明：(MapID, X, Y, Z, 0);
-                case GOSSIP_ACTION_INFO_DEF + 12 :
+                case GOSSIP_ACTION_INFO_DEF + 4 :
                     player->TeleportTo(0,-9481.493164,-3326.915283,8.864347,0.846896);
                     break;
                 //地鐵海底
-                case GOSSIP_ACTION_INFO_DEF + 13 :
+                case GOSSIP_ACTION_INFO_DEF + 5 :
                     player->TeleportTo(369, -9.96166,1238.17,-126.102,0);
                     break;
                 //工程師之島
-                case GOSSIP_ACTION_INFO_DEF + 14 :
+                case GOSSIP_ACTION_INFO_DEF + 6 :
                     player->TeleportTo(451, 16299.464844, 16272.843750, 69.443901 ,0);
                     break;
-                //
-                case GOSSIP_ACTION_INFO_DEF + 15 :
+                // KaLaZan
+                case GOSSIP_ACTION_INFO_DEF + 7 :
                     player->TeleportTo(0, 11037.7 ,1999.49, 92.9823 ,0);
                     break;
-                case GOSSIP_ACTION_INFO_DEF + 16 :
+                case GOSSIP_ACTION_INFO_DEF + 8 :
                     GossipHello_ItemUse_Item_teleport(player,_Item,targets);
                     break;
             }
