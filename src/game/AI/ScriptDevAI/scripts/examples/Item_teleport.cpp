@@ -20,8 +20,8 @@
 #include <cstring>
 enum
 {
-    SPELL_DOMINION_SOUL     = 10202,
-    NPC_EMBERSTRIFE         = 10321
+    SPELL_DOMINION_SOUL1     = 10202,
+    NPC_EMBERSTRIFE1         = 10321
 };
 
 bool GossipHello_ItemUse_Item_teleport(Player *player, Item* _Item, SpellCastTargets const& targets)
@@ -37,7 +37,7 @@ bool GossipHello_ItemUse_Item_teleport(Player *player, Item* _Item, SpellCastTar
     
     player->SendEquipError(EQUIP_ERR_NONE, _Item, NULL);
 
-    if (const SpellEntry* pSpellInfo = GetSpellStore()->LookupEntry<SpellEntry>(SPELL_DOMINION_SOUL))
+    if (const SpellEntry* pSpellInfo = GetSpellStore()->LookupEntry<SpellEntry>(SPELL_DOMINION_SOUL1))
         Spell::SendCastResult(player, pSpellInfo, SPELL_FAILED_TARGET_AURASTATE);
 
     return true;
