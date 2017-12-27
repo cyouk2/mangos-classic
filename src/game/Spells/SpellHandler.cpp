@@ -46,7 +46,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
         recvPacket.rpos(recvPacket.wpos());                 // prevent spam at not read packet tail
         return;
     }
-
+	outstring_log("111111");
     Item* pItem = pUser->GetItemByPos(bagIndex, slot);
     if (!pItem)
     {
@@ -54,7 +54,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
         pUser->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, nullptr, nullptr);
         return;
     }
-
+	outstring_log("222222");
     DETAIL_LOG("WORLD: CMSG_USE_ITEM packet, bagIndex: %u, slot: %u, spell_count: %u , Item: %u, data length = %u", bagIndex, slot, spell_count, pItem->GetEntry(), (uint32)recvPacket.size());
 
     ItemPrototype const* proto = pItem->GetProto();
@@ -64,7 +64,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
         pUser->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, pItem, nullptr);
         return;
     }
-
+	
     // some item classes can be used only in equipped state
     if (proto->InventoryType != INVTYPE_NON_EQUIP && !pItem->IsEquipped())
     {
@@ -88,7 +88,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
         pUser->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, pItem, nullptr);
         return;
     }
-
+	outstring_log("333333");
     if (pUser->isInCombat())
     {
         for (int i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
@@ -114,7 +114,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
             pItem->SetBinding(true);
         }
     }
-
+	outstring_log("444444");
     SpellCastTargets targets;
 
     recvPacket >> targets.ReadForCaster(pUser);
@@ -146,9 +146,11 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
     // Note: If script stop casting it must send appropriate data to client to prevent stuck item in gray state.
     if (!sScriptDevAIMgr.OnItemUse(pUser, pItem, targets))
     {
+		outstring_log("555555");
         // no script or script not process request by self
         pUser->CastItemUseSpell(pItem, targets);
     }else{
+		outstring_log("666666");
 		return;
 	}
 }
