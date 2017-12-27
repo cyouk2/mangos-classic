@@ -45,7 +45,7 @@ void SendDefaultMenu_ItemUse_Item_teleport(Player *player, Item *_Item, uint32 a
             player->ADD_GOSSIP_ITEM( 0, " [部落] 幽暗城 " , 2, GOSSIP_ACTION_INFO_DEF + 6);
             player->ADD_GOSSIP_ITEM( 0, " [中立] 棘齿城 " , 2, GOSSIP_ACTION_INFO_DEF + 7);
             player->ADD_GOSSIP_ITEM( 0, " [中立] 藏宝海湾 " , 2, GOSSIP_ACTION_INFO_DEF + 8);
-            player->ADD_GOSSIP_ITEM( 7, " 上一级菜单 " , 2, GOSSIP_ACTION_INFO_DEF + 9);
+            player->ADD_GOSSIP_ITEM( 7, " 上一级菜单 " , 15, GOSSIP_ACTION_INFO_DEF + 99);
             player->SEND_GOSSIP_MENU(99987,_Item->GetObjectGuid());
             break;
         // 初级副本
@@ -62,7 +62,7 @@ void SendDefaultMenu_ItemUse_Item_teleport(Player *player, Item *_Item, uint32 a
             player->ADD_GOSSIP_ITEM( 0, " [40] 血色修道院 " , 4, GOSSIP_ACTION_INFO_DEF + 9);
             player->ADD_GOSSIP_ITEM( 0, " [42] 剃刀高地 " , 4, GOSSIP_ACTION_INFO_DEF + 10);
             player->ADD_GOSSIP_ITEM( 0, " [45] 奥达曼 " , 4, GOSSIP_ACTION_INFO_DEF + 11);
-            player->ADD_GOSSIP_ITEM( 7, " 上一级菜单 " , 4, GOSSIP_ACTION_INFO_DEF + 12);
+            player->ADD_GOSSIP_ITEM( 7, " 上一级菜单 " , 15, GOSSIP_ACTION_INFO_DEF + 99);
             player->SEND_GOSSIP_MENU(99986,_Item->GetObjectGuid());
             break;
 
@@ -79,7 +79,7 @@ void SendDefaultMenu_ItemUse_Item_teleport(Player *player, Item *_Item, uint32 a
             player->ADD_GOSSIP_ITEM( 0, " [60] 厄运之槌 (西区) " , 5, GOSSIP_ACTION_INFO_DEF + 8);
             player->ADD_GOSSIP_ITEM( 0, " [60] 斯坦索姆 " , 5, GOSSIP_ACTION_INFO_DEF + 9);
             player->ADD_GOSSIP_ITEM( 0, " [60] 黑石塔下 " , 5, GOSSIP_ACTION_INFO_DEF + 10);
-            player->ADD_GOSSIP_ITEM( 7, " 上一级菜单 " , 5, GOSSIP_ACTION_INFO_DEF + 11);
+            player->ADD_GOSSIP_ITEM( 7, " 上一级菜单 " , 15, GOSSIP_ACTION_INFO_DEF + 99);
             player->SEND_GOSSIP_MENU(99993,_Item->GetObjectGuid());
             break;
 
@@ -95,7 +95,7 @@ void SendDefaultMenu_ItemUse_Item_teleport(Player *player, Item *_Item, uint32 a
             player->ADD_GOSSIP_ITEM( 0, " [团] 奥妮克希亚的巢穴 " , 6, GOSSIP_ACTION_INFO_DEF + 7);
             player->ADD_GOSSIP_ITEM( 0, " [团] 纳克萨玛斯 " , 6, GOSSIP_ACTION_INFO_DEF + 8);
             player->ADD_GOSSIP_ITEM( 0, " [团] 冰龙巢穴 " , 6, GOSSIP_ACTION_INFO_DEF + 9);
-            player->ADD_GOSSIP_ITEM( 7, " 上一级菜单 " , 6, GOSSIP_ACTION_INFO_DEF + 10); 
+            player->ADD_GOSSIP_ITEM( 7, " 上一级菜单 " , 15, GOSSIP_ACTION_INFO_DEF + 99); 
             player->SEND_GOSSIP_MENU(99994,_Item->GetObjectGuid());
             break;
 
@@ -108,7 +108,7 @@ void SendDefaultMenu_ItemUse_Item_teleport(Player *player, Item *_Item, uint32 a
             player->ADD_GOSSIP_ITEM( 0, " [野外]艾萨拉 " , 9, GOSSIP_ACTION_INFO_DEF + 4);
             player->ADD_GOSSIP_ITEM( 0, " [野外]菲拉斯 " , 9, GOSSIP_ACTION_INFO_DEF + 5);
             player->ADD_GOSSIP_ITEM( 0, " [野外]诅咒之地 " , 9, GOSSIP_ACTION_INFO_DEF + 6);
-            player->ADD_GOSSIP_ITEM( 7, " 上一级菜单 " , 9, GOSSIP_ACTION_INFO_DEF + 7);
+            player->ADD_GOSSIP_ITEM( 7, " 上一级菜单 " , 15, GOSSIP_ACTION_INFO_DEF + 99);
             player->SEND_GOSSIP_MENU(99988,_Item->GetObjectGuid()); 
             break;
         // 風景傳送
@@ -121,7 +121,7 @@ void SendDefaultMenu_ItemUse_Item_teleport(Player *player, Item *_Item, uint32 a
             player->ADD_GOSSIP_ITEM( 0, " 梦境之树 " , 11, GOSSIP_ACTION_INFO_DEF + 6);
             player->ADD_GOSSIP_ITEM( 0, " GM之岛" , 11, GOSSIP_ACTION_INFO_DEF + 7);
             player->ADD_GOSSIP_ITEM( 0, " 海加尔山-暴雪路障 " , 11, GOSSIP_ACTION_INFO_DEF + 8);
-            player->ADD_GOSSIP_ITEM( 7, " 上一级菜单 " , 11, GOSSIP_ACTION_INFO_DEF + 9);
+            player->ADD_GOSSIP_ITEM( 7, " 上一级菜单 " , 15, GOSSIP_ACTION_INFO_DEF + 99);
             player->SEND_GOSSIP_MENU(99989,_Item->GetObjectGuid()); 
             break;
         case GOSSIP_ACTION_INFO_DEF + 7 :
@@ -132,7 +132,7 @@ void SendDefaultMenu_ItemUse_Item_teleport(Player *player, Item *_Item, uint32 a
             player->ADD_GOSSIP_ITEM( 0, " 地铁海底" , 12, GOSSIP_ACTION_INFO_DEF + 5);
             player->ADD_GOSSIP_ITEM( 0, " 工程之岛" , 12, GOSSIP_ACTION_INFO_DEF + 6);
             player->ADD_GOSSIP_ITEM( 0, " KaLaZan" , 12, GOSSIP_ACTION_INFO_DEF + 7);
-            player->ADD_GOSSIP_ITEM( 7, " 上一级菜单 " , 12, GOSSIP_ACTION_INFO_DEF + 8);
+            player->ADD_GOSSIP_ITEM( 7, " 上一级菜单 " , 15, GOSSIP_ACTION_INFO_DEF + 99);
             player->SEND_GOSSIP_MENU(99997,_Item->GetObjectGuid());
         break;
     }
@@ -142,16 +142,12 @@ bool GossipSelect_ItemUse_Item_teleport(Player *player, Item *_Item, uint32 send
 {
     switch(sender) {
         // 主选单
-        case GOSSIP_SENDER_MAIN :
+        case 1 :
             SendDefaultMenu_ItemUse_Item_teleport(player, _Item, action,targets);
             break;
         // 各大主城
         case 2 :
             switch(action) {
-                // 主选单
-                case GOSSIP_ACTION_INFO_DEF + 9 :
-                    GossipHello_ItemUse_Item_teleport(player,_Item,targets);
-                    break;
                 // 暴风城
                 case GOSSIP_ACTION_INFO_DEF + 1 :
                     player->TeleportTo(0,-9065,434,94,0);
@@ -189,9 +185,6 @@ bool GossipSelect_ItemUse_Item_teleport(Player *player, Item *_Item, uint32 send
             break;
         case 4:
             switch(action) {
-                case GOSSIP_ACTION_INFO_DEF + 12 :
-                    GossipHello_ItemUse_Item_teleport(player,_Item,targets);
-                    break;
                 // [14] 怒焰裂谷 统一格式说明：(MapID, X, Y, Z, 0);
                 case GOSSIP_ACTION_INFO_DEF + 1 :
                     player->TeleportTo(389,2.024650,-10.021000,-16.187500,0);
@@ -242,9 +235,6 @@ bool GossipSelect_ItemUse_Item_teleport(Player *player, Item *_Item, uint32 send
         // 中级副本
         case 5:
             switch(action) {
-                case GOSSIP_ACTION_INFO_DEF + 11 :
-                    GossipHello_ItemUse_Item_teleport(player,_Item,targets);
-                    break;
                 // [46] 祖尔法拉克 统一格式说明：(MapID, X, Y, Z, 0);
                 case GOSSIP_ACTION_INFO_DEF + 1 :
                     player->TeleportTo(209,1213,841,8.9,0);
@@ -292,9 +282,6 @@ bool GossipSelect_ItemUse_Item_teleport(Player *player, Item *_Item, uint32 send
         // 高级副本
         case 6:
             switch(action) {
-                case GOSSIP_ACTION_INFO_DEF + 10 :
-                    GossipHello_ItemUse_Item_teleport(player,_Item,targets);
-                    break;
                 // [团] 溶火之心 统一格式说明：(MapID, X, Y, Z, 0);
                 case GOSSIP_ACTION_INFO_DEF + 1 :
                     player->TeleportTo(409,1089.601685,-470.190247,-106.413055,0);
@@ -337,9 +324,6 @@ bool GossipSelect_ItemUse_Item_teleport(Player *player, Item *_Item, uint32 send
         // 野外BOSS坐标
         case 9:
             switch(action) {
-                case GOSSIP_ACTION_INFO_DEF + 7 :
-                    GossipHello_ItemUse_Item_teleport(player,_Item,targets);
-                    break;
                 // 暮色森林 统一格式说明：(MapID, X, Y, Z, 0);
                 case GOSSIP_ACTION_INFO_DEF + 1 :
                     player->TeleportTo(0,-10526.168945,-434.996796,50.894821,0);
@@ -401,9 +385,6 @@ bool GossipSelect_ItemUse_Item_teleport(Player *player, Item *_Item, uint32 send
                 case GOSSIP_ACTION_INFO_DEF + 8 :
                     player->TeleportTo(1,5478.060059,-3730.850098,1593.439941,5.610376);
                     break;
-                case GOSSIP_ACTION_INFO_DEF + 9 :
-                    GossipHello_ItemUse_Item_teleport(player,_Item,targets);
-                    break;
             }
             player->CLOSE_GOSSIP_MENU();
             break;
@@ -437,12 +418,12 @@ bool GossipSelect_ItemUse_Item_teleport(Player *player, Item *_Item, uint32 send
                 case GOSSIP_ACTION_INFO_DEF + 7 :
                     player->TeleportTo(0, 11037.7 ,1999.49, 92.9823 ,0);
                     break;
-                case GOSSIP_ACTION_INFO_DEF + 8 :
-                    GossipHello_ItemUse_Item_teleport(player,_Item,targets);
-                    break;
             }
             player->CLOSE_GOSSIP_MENU();
             break;
+		case 15:
+			GossipHello_ItemUse_Item_teleport(player,_Item,targets);
+			break;
     }
     return true;
 }
