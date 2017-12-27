@@ -26,7 +26,7 @@ bool GossipHello_ItemUse_Item_teleport(Player *player, Item* _Item, SpellCastTar
     player->ADD_GOSSIP_ITEM( 3, " 团队副本传送 " , 1, GOSSIP_ACTION_INFO_DEF + 4);
     player->ADD_GOSSIP_ITEM( 3, " 野外BOSS传送 " , 1, GOSSIP_ACTION_INFO_DEF + 5);
     player->ADD_GOSSIP_ITEM( 3, " 世界风景传送1 " , 1, GOSSIP_ACTION_INFO_DEF + 6);
-	player->ADD_GOSSIP_ITEM( 3, " 世界风景传送2 " , 1, GOSSIP_ACTION_INFO_DEF + 7);
+    player->ADD_GOSSIP_ITEM( 3, " 世界风景传送2 " , 1, GOSSIP_ACTION_INFO_DEF + 7);
     player->SEND_GOSSIP_MENU(99990,_Item->GetObjectGuid());
     return true;
 }
@@ -122,9 +122,9 @@ void SendDefaultMenu_ItemUse_Item_teleport(Player *player, Item *_Item, uint32 a
             player->ADD_GOSSIP_ITEM( 0, " GM之岛" , 11, GOSSIP_ACTION_INFO_DEF + 7);
             player->ADD_GOSSIP_ITEM( 0, " 海加尔山-暴雪路障 " , 11, GOSSIP_ACTION_INFO_DEF + 8);
             player->ADD_GOSSIP_ITEM( 7, " 上一级菜单 " , 11, GOSSIP_ACTION_INFO_DEF + 9);
-			player->SEND_GOSSIP_MENU(99989,_Item->GetObjectGuid()); 
+            player->SEND_GOSSIP_MENU(99989,_Item->GetObjectGuid()); 
             break;
-		case GOSSIP_ACTION_INFO_DEF + 7 :
+        case GOSSIP_ACTION_INFO_DEF + 7 :
             player->ADD_GOSSIP_ITEM( 0, " 天涯海滩 " , 12, GOSSIP_ACTION_INFO_DEF + 1);
             player->ADD_GOSSIP_ITEM( 0, " 安戈洛环形山 " , 12, GOSSIP_ACTION_INFO_DEF + 2);
             player->ADD_GOSSIP_ITEM( 0, " 比吉尔的飞艇残骸 " , 12, GOSSIP_ACTION_INFO_DEF + 3);
@@ -401,10 +401,10 @@ bool GossipSelect_ItemUse_Item_teleport(Player *player, Item *_Item, uint32 send
                 case GOSSIP_ACTION_INFO_DEF + 8 :
                     player->TeleportTo(1,5478.060059,-3730.850098,1593.439941,5.610376);
                     break;
-				case GOSSIP_ACTION_INFO_DEF + 9 :
+                case GOSSIP_ACTION_INFO_DEF + 9 :
                     GossipHello_ItemUse_Item_teleport(player,_Item,targets);
                     break;
-			}
+            }
             player->CLOSE_GOSSIP_MENU();
             break;
         case 12 :
