@@ -18,6 +18,11 @@
 #include "AI/ScriptDevAI/PreCompiledHeader.h"
 #include "Spells/Spell.h"
 #include <cstring>
+enum
+{
+    SPELL_DOMINION_SOUL     = 10202,
+    NPC_EMBERSTRIFE         = 10321
+};
 
 bool GossipHello_ItemUse_Item_teleport(Player *player, Item* _Item, SpellCastTargets const& targets)
 {
@@ -29,11 +34,11 @@ bool GossipHello_ItemUse_Item_teleport(Player *player, Item* _Item, SpellCastTar
     player->ADD_GOSSIP_ITEM( 3, " 世界风景传送1 " , 1, GOSSIP_ACTION_INFO_DEF + 6);
     player->ADD_GOSSIP_ITEM( 3, " 世界风景传送2 " , 1, GOSSIP_ACTION_INFO_DEF + 7);
     player->SEND_GOSSIP_MENU(99990,_Item->GetObjectGuid());
-	
-	player->SendEquipError(EQUIP_ERR_NONE, _Item, NULL);
+    
+    player->SendEquipError(EQUIP_ERR_NONE, _Item, NULL);
 
-	//if (const SpellEntry* pSpellInfo = GetSpellStore()->LookupEntry<SpellEntry>(SPELL_DOMINION_SOUL))
-	//	Spell::SendCastResult(pPlayer, pSpellInfo, SPELL_FAILED_TARGET_AURASTATE);
+    if (const SpellEntry* pSpellInfo = GetSpellStore()->LookupEntry<SpellEntry>(SPELL_DOMINION_SOUL))
+        Spell::SendCastResult(player, pSpellInfo, SPELL_FAILED_TARGET_AURASTATE);
 
     return true;
 }
@@ -138,7 +143,6 @@ void SendDefaultMenu_ItemUse_Item_teleport(Player *player, Item *_Item, uint32 a
             player->ADD_GOSSIP_ITEM( 0, " 石堡瀑布" , 12, GOSSIP_ACTION_INFO_DEF + 4);
             player->ADD_GOSSIP_ITEM( 0, " 地铁海底" , 12, GOSSIP_ACTION_INFO_DEF + 5);
             player->ADD_GOSSIP_ITEM( 0, " 工程之岛" , 12, GOSSIP_ACTION_INFO_DEF + 6);
-            player->ADD_GOSSIP_ITEM( 0, " KaLaZan" , 12, GOSSIP_ACTION_INFO_DEF + 7);
             player->ADD_GOSSIP_ITEM( 7, " 上一级菜单 " , 15, GOSSIP_ACTION_INFO_DEF + 99);
             player->SEND_GOSSIP_MENU(99997,_Item->GetObjectGuid());
         break;
@@ -421,16 +425,12 @@ bool GossipSelect_ItemUse_Item_teleport(Player *player, Item *_Item, uint32 send
                 case GOSSIP_ACTION_INFO_DEF + 6 :
                     player->TeleportTo(451, 16299.464844, 16272.843750, 69.443901 ,0);
                     break;
-                // KaLaZan
-                case GOSSIP_ACTION_INFO_DEF + 7 :
-                    player->TeleportTo(0, 11037.7 ,1999.49, 92.9823 ,0);
-                    break;
             }
             player->CLOSE_GOSSIP_MENU();
             break;
-		case 15:
-			GossipHello_ItemUse_Item_teleport(player,_Item,targets);
-			break;
+        case 15:
+            GossipHello_ItemUse_Item_teleport(player,_Item,targets);
+            break;
     }
     return true;
 }
