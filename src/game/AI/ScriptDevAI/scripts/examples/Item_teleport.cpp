@@ -37,9 +37,10 @@ bool GossipHello_ItemUse_Item_teleport(Player *player, Item* _Item, SpellCastTar
     
     player->SendEquipError(EQUIP_ERR_NONE, _Item, NULL);
 
-    //if (const SpellEntry* pSpellInfo = GetSpellStore()->LookupEntry<SpellEntry>(SPELL_DOMINION_SOUL1))
-     //   Spell::SendCastResult(player, pSpellInfo, SPELL_FAILED_TARGET_AURASTATE);
-
+    if (const SpellEntry* pSpellInfo = GetSpellStore()->LookupEntry<SpellEntry>(SPELL_DOMINION_SOUL1))
+    {  
+        Spell::SendCastResult(player, pSpellInfo, SPELL_FAILED_TARGET_AURASTATE);
+    }
     return true;
 }
 
