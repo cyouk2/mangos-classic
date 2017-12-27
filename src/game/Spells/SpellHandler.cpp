@@ -148,7 +148,9 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
     {
         // no script or script not process request by self
         pUser->CastItemUseSpell(pItem, targets);
-    }
+    }else{
+		return;
+	}
 }
 
 #define OPEN_CHEST 11437
