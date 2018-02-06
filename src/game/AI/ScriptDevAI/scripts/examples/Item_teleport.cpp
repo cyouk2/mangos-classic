@@ -304,7 +304,7 @@ bool GossipSelect_ItemUse_Item_teleport(Player *player, Item *_Item, uint32 send
                     break;
                 // [团] 祖尔格拉布
                 case GOSSIP_ACTION_INFO_DEF + 3 :
-                    player->TeleportTo(309,-11916f,-1251.469971f,92.32f,0);
+                    player->TeleportTo(309,-11916,-1251.469971f,92.32f,0);
                     break;
                 // [团] 黑翼之巢
                 case GOSSIP_ACTION_INFO_DEF + 4 :
