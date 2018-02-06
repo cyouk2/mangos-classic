@@ -6,7 +6,7 @@ option(BUILD_GAME_SERVER    "Build game server"                     ON)
 option(BUILD_LOGIN_SERVER   "Build login server"                    ON)
 option(BUILD_EXTRACTORS     "Build map/dbc/vmap/mmap extractors"    OFF)
 option(BUILD_SCRIPTDEV      "Build ScriptDev. (OFF Speedup build)"  ON)
-option(BUILD_PLAYERBOT      "Build Playerbot mod"                   OFF)
+option(BUILD_PLAYERBOT      "Build Playerbot mod"                   ON)
 
 # TODO: options that should be checked/created:
 #option(CLI                  "With CLI"                              ON)
