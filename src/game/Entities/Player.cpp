@@ -131,6 +131,19 @@ enum CharacterFlags
 
 static const uint32 corpseReclaimDelay[MAX_DEATH_COUNT] = {30, 60, 120};
 
+// Number of slots in keyring depending on the player's level
+// Values taken from Vanilla 1.11 / 1.12 Client :
+static const uint32 LevelUpKeyringSize[DEFAULT_MAX_LEVEL / 10 + 1] =
+{
+	4,  // level  1 ->  9
+	4,  // level 10 -> 19
+	4,  // level 20 -> 29
+	4,  // level 30 -> 39
+	8,  // level 40 -> 49
+	12, // level 50 -> 59
+	12, // level 60 -> 69
+};
+
 //== PlayerTaxi ================================================
 
 PlayerTaxi::PlayerTaxi()
@@ -851,13 +864,15 @@ Item* Player::StoreNewItemInInventorySlot(uint32 itemEntry, uint32 amount)
 {
     ItemPosCountVec vDest;
 
-    uint8 msg = CanStoreNewItem(INVENTORY_SLOT_BAG_0, NULL_SLOT, vDest, itemEntry, amount);
+    InventoryResult msg = CanStoreNewItem(INVENTORY_SLOT_BAG_0, NULL_SLOT, vDest, itemEntry, amount);
 
     if (msg == EQUIP_ERR_OK)
     {
         if (Item* pItem = StoreNewItem(vDest, itemEntry, true, Item::GenerateItemRandomPropertyId(itemEntry)))
             return pItem;
     }
+    else
+        SendEquipError(msg, nullptr, nullptr, itemEntry);
 
     return nullptr;
 }
@@ -1378,9 +1393,6 @@ void Player::SetDeathState(DeathState s)
         // FIXME: is pet dismissed at dying or releasing spirit? if second, add SetDeathState(DEAD) to HandleRepopRequestOpcode and define pet unsummon here with (s == DEAD)
         RemovePet(PET_SAVE_REAGENTS);
 
-        // remove uncontrolled pets
-        RemoveMiniPet();
-
         // save value before aura remove in Unit::SetDeathState
         ressSpellId = GetUInt32Value(PLAYER_SELF_RES_SPELL);
 
@@ -1570,7 +1582,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     MapEntry const* mEntry = sMapStore.LookupEntry(mapid);  // Validity checked in IsValidMapCoord
 
     // do not let charmed players/creatures teleport
-    if (isCharmed())
+    if (HasCharmer())
         return false;
 
 #ifdef BUILD_PLAYERBOT
@@ -1631,7 +1643,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             if (Unit* charm = GetCharm())
             {
                 if (!charm->IsWithinDist3d(x, y, z, GetMap()->GetVisibilityDistance()))
-                    Uncharm();
+                    BreakCharmOutgoing(charm);
             }
 
             if (Pet* pet = GetPet())
@@ -1644,7 +1656,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         else
         {
             if (Unit* charm = GetCharm())
-                Uncharm();
+                BreakCharmOutgoing(charm);
 
             if (Pet* pet = GetPet())
                 UnsummonPetTemporaryIfAny();
@@ -1881,7 +1893,6 @@ void Player::RemoveFromWorld()
     {
         ///- Release charmed creatures, unsummon totems and remove pets/guardians
         UnsummonAllTotems();
-        RemoveMiniPet();
     }
 
     for (int i = PLAYER_SLOT_START; i < PLAYER_SLOT_END; ++i)
@@ -2174,6 +2185,8 @@ void Player::SetGameMaster(bool on)
         m_ExtraFlags |= PLAYER_EXTRA_GM_ON;
         setFaction(35);
         SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM);
+        SetImmuneToNPC(true);
+        SetImmuneToPlayer(true);
 
         CallForAllControlledUnits(SetGameMasterOnHelper(), CONTROLLED_PET | CONTROLLED_TOTEMS | CONTROLLED_GUARDIANS | CONTROLLED_CHARM);
 
@@ -2188,6 +2201,8 @@ void Player::SetGameMaster(bool on)
         m_ExtraFlags &= ~ PLAYER_EXTRA_GM_ON;
         setFactionForRace(getRace());
         RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM);
+        SetImmuneToNPC(false);
+        SetImmuneToPlayer(false);
 
         CallForAllControlledUnits(SetGameMasterOffHelper(getFaction()), CONTROLLED_PET | CONTROLLED_TOTEMS | CONTROLLED_GUARDIANS | CONTROLLED_CHARM);
 
@@ -2561,8 +2576,9 @@ void Player::InitStatsForLevel(bool reapplyMods)
                UNIT_FLAG_IMMUNE_TO_PLAYER | UNIT_FLAG_IMMUNE_TO_NPC    | UNIT_FLAG_LOOTING          |
                UNIT_FLAG_PET_IN_COMBAT  | UNIT_FLAG_SILENCED     | UNIT_FLAG_PACIFIED         |
                UNIT_FLAG_STUNNED        | UNIT_FLAG_IN_COMBAT    | UNIT_FLAG_DISARMED         |
-               UNIT_FLAG_CONFUSED       | UNIT_FLAG_FLEEING      | UNIT_FLAG_NOT_SELECTABLE   |
-               UNIT_FLAG_SKINNABLE      | UNIT_FLAG_TAXI_FLIGHT);
+               UNIT_FLAG_CONFUSED       | UNIT_FLAG_FLEEING      | UNIT_FLAG_POSSESSED        |
+               UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_SKINNABLE    |
+               UNIT_FLAG_TAXI_FLIGHT);
     SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);    // must be set
 
     // cleanup player flags (will be re-applied if need at aura load), to avoid have ghost flag without ghost aura, for example.
@@ -5132,7 +5148,7 @@ void Player::UpdateCombatSkills(Unit* pVictim, WeaponAttackType attType, bool de
     if (lvldif < 3)
         lvldif = 3;
 
-    int32 skilldif = 5 * plevel - (defence ? GetBaseDefenseSkillValue() : GetBaseWeaponSkillValue(attType));
+    int32 skilldif = 5 * plevel - (defence ? GetPureDefenseSkillValue() : GetPureWeaponSkillValue(attType));
 
     // Max skill reached for level.
     // Can in some cases be less than 0: having max skill and then .level -1 as example.
@@ -8096,7 +8112,7 @@ InventoryResult Player::_CanStoreItem_InSpecificSlot(uint8 bag, uint8 slot, Item
         if (bag == INVENTORY_SLOT_BAG_0)
         {
             // keyring case
-            if (slot >= KEYRING_SLOT_START && slot < KEYRING_SLOT_START + GetMaxKeyringSize() && !(pProto->BagFamily == BAG_FAMILY_KEYS))
+            if (slot >= KEYRING_SLOT_START && slot < KEYRING_SLOT_START + GetMaxKeyringClientSize() && !(pProto->BagFamily == BAG_FAMILY_KEYS))
                 return EQUIP_ERR_ITEM_DOESNT_GO_INTO_BAG;
 
             // prevent cheating
@@ -8404,7 +8420,7 @@ InventoryResult Player::_CanStoreItem(uint8 bag, uint8 slot, ItemPosCountVec& de
             // search free slot - keyring case
             if (pProto->BagFamily == BAG_FAMILY_KEYS)
             {
-                uint32 keyringSize = GetMaxKeyringSize();
+                uint32 keyringSize = GetMaxKeyringClientSize();
                 res = _CanStoreItem_InInventorySlots(KEYRING_SLOT_START, KEYRING_SLOT_START + keyringSize, dest, pProto, count, false, pItem, bag, slot);
                 if (res != EQUIP_ERR_OK)
                 {
@@ -8551,7 +8567,7 @@ InventoryResult Player::_CanStoreItem(uint8 bag, uint8 slot, ItemPosCountVec& de
     {
         if (pProto->BagFamily == BAG_FAMILY_KEYS)
         {
-            uint32 keyringSize = GetMaxKeyringSize();
+            uint32 keyringSize = GetMaxKeyringClientSize();
             res = _CanStoreItem_InInventorySlots(KEYRING_SLOT_START, KEYRING_SLOT_START + keyringSize, dest, pProto, count, false, pItem, bag, slot);
             if (res != EQUIP_ERR_OK)
             {
@@ -8770,7 +8786,7 @@ InventoryResult Player::CanStoreItems(Item** pItems, int count) const
             bool b_found = false;
             if (pProto->BagFamily == BAG_FAMILY_KEYS)
             {
-                uint32 keyringSize = GetMaxKeyringSize();
+                uint32 keyringSize = GetMaxKeyringClientSize();
                 for (uint32 t = KEYRING_SLOT_START; t < KEYRING_SLOT_START + keyringSize; ++t)
                 {
                     if (inv_keys[t - KEYRING_SLOT_START] == 0)
@@ -10522,6 +10538,15 @@ void Player::RemoveItemFromBuyBackSlot(uint32 slot, bool del)
     }
 }
 
+uint32 Player::GetMaxKeyringClientSize() const
+{
+	// Normal player level: safely rely on client GUI expected values
+	if (getLevel() <= DEFAULT_MAX_LEVEL)
+		return LevelUpKeyringSize[(int)(getLevel() / 10)];
+	// abnormal player level (GM mode): use the full available slots though Classic client is limited to 16 above level 60 (big guys know what they do)
+	return KEYRING_SLOT_END - KEYRING_SLOT_START;
+}
+
 void Player::SendEquipError(InventoryResult msg, Item* pItem, Item* pItem2, uint32 itemid /*= 0*/) const
 {
     DEBUG_LOG("WORLD: Sent SMSG_INVENTORY_CHANGE_FAILURE (%u)", msg);
@@ -11812,11 +11837,11 @@ bool Player::CanRewardQuest(Quest const* pQuest, uint32 reward, bool msg) const
     if (!CanRewardQuest(pQuest, msg))
         return false;
 
+    ItemPosCountVec dest;
     if (pQuest->GetRewChoiceItemsCount() > 0)
     {
         if (pQuest->RewChoiceItemId[reward])
         {
-            ItemPosCountVec dest;
             InventoryResult res = CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, pQuest->RewChoiceItemId[reward], pQuest->RewChoiceItemCount[reward]);
             if (res != EQUIP_ERR_OK)
             {
@@ -11832,7 +11857,6 @@ bool Player::CanRewardQuest(Quest const* pQuest, uint32 reward, bool msg) const
         {
             if (pQuest->RewItemId[i])
             {
-                ItemPosCountVec dest;
                 InventoryResult res = CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, pQuest->RewItemId[i], pQuest->RewItemCount[i]);
                 if (res != EQUIP_ERR_OK)
                 {
@@ -15809,20 +15833,6 @@ void Player::RemovePet(PetSaveMode mode)
         pet->Unsummon(mode, this);
 }
 
-void Player::RemoveMiniPet()
-{
-    if (Pet* pet = GetMiniPet())
-        pet->Unsummon(PET_SAVE_AS_DELETED);
-}
-
-Pet* Player::GetMiniPet() const
-{
-    if (m_miniPetGuid.IsEmpty())
-        return nullptr;
-
-    return GetMap()->GetPet(m_miniPetGuid);
-}
-
 void Player::Say(const std::string& text, const uint32 language) const
 {
     WorldPacket data;
@@ -18025,6 +18035,19 @@ uint32 Player::GetBaseWeaponSkillValue(WeaponAttackType attType) const
     return GetBaseSkillValue(skill);
 }
 
+uint32 Player::GetPureWeaponSkillValue(WeaponAttackType attType) const
+{
+    Item* item = GetWeaponForAttack(attType, true, true);
+
+    // unarmed only with base attack
+    if (attType != BASE_ATTACK && !item)
+        return 0;
+
+    // weapon skill or (unarmed for base attack)
+    uint32  skill = item ? item->GetSkill() : uint32(SKILL_UNARMED);
+    return GetPureSkillValue(skill);
+}
+
 void Player::ResurectUsingRequestData()
 {
     /// Teleport before resurrecting by player, otherwise the player might get attacked from creatures near his corpse
@@ -18089,7 +18112,7 @@ bool Player::IsClientControl(Unit const* target) const
 
     // If unit is possessed, it must be charmed by the player
     if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_POSSESSED))
-        return (target->GetCharmerGuid() == GetObjectGuid());
+        return target->HasCharmer(GetObjectGuid());
 
     // Players only have control over self by default
     return (target == this);
@@ -18109,23 +18132,6 @@ void Player::UpdateClientControl(Unit const* target, bool enabled, bool forced) 
             data << uint8(enabled);
             GetSession()->SendPacket(data);
         }
-    }
-}
-
-void Player::Uncharm()
-{
-    if (Unit* charm = GetCharm())
-    {
-        charm->RemoveSpellsCausingAura(SPELL_AURA_MOD_CHARM);
-        charm->RemoveSpellsCausingAura(SPELL_AURA_MOD_POSSESS);
-        charm->RemoveSpellsCausingAura(SPELL_AURA_MOD_POSSESS_PET);
-    }
-
-    if (Unit* charm = GetCharm())
-    {
-        // try remove charm by spellid
-        if (uint32 spellid = charm->GetUInt32Value(UNIT_CREATED_BY_SPELL))
-            RemoveAurasDueToSpell(spellid);
     }
 }
 

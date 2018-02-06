@@ -5205,9 +5205,9 @@ bool Unit::IsHostileTo(Unit const* unit) const
 
     // test pet/charm masters instead pers/charmeds
     const Unit* testerCharmer = GetCharmer();
-    const Unit* testerOwner = testerCharmer ? testerCharmer : GetOwner(true);
+    const Unit* testerOwner = testerCharmer ? testerCharmer : GetOwner(nullptr, true);
     const Unit* targetCharmer = unit->GetCharmer();
-    const Unit* targetOwner = targetCharmer ? targetCharmer : unit->GetOwner(true);
+    const Unit* targetOwner = targetCharmer ? targetCharmer : unit->GetOwner(nullptr, true);
 
     // always hostile to owner's enemy
     if (testerOwner && (testerOwner->getVictim() == unit || unit->getVictim() == testerOwner))
@@ -5319,9 +5319,9 @@ bool Unit::IsFriendlyTo(Unit const* unit) const
 
     // test pet/charm masters instead pers/charmeds
     const Unit* testerCharmer = GetCharmer();
-    const Unit* testerOwner = testerCharmer ? testerCharmer : GetOwner(true);
+    const Unit* testerOwner = testerCharmer ? testerCharmer : GetOwner(nullptr, true);
     const Unit* targetCharmer = unit->GetCharmer();
-    const Unit* targetOwner = targetCharmer ? targetCharmer : unit->GetOwner(true);
+    const Unit* targetOwner = targetCharmer ? targetCharmer : unit->GetOwner(nullptr, true);
 
     // always non-friendly to owner's enemy
     if (testerOwner && (testerOwner->getVictim() == unit || unit->getVictim() == testerOwner))
@@ -5672,57 +5672,18 @@ void Unit::ModifyAuraState(AuraState flag, bool apply)
     }
 }
 
-ObjectGuid const& Unit::GetMasterGuid() const
-{
-    ObjectGuid const& guid = GetCharmerGuid();
-    return (guid ? guid : GetOwnerGuid());
-}
-
-Unit* Unit::GetOwner(bool recursive /*= false*/) const
-{
-    // Default, creator field as owner is present in everything: totems, pets, guardians, etc
-    Unit* owner = GetCreator();
-    // Query owner recursively (ascending)
-    if (recursive)
-    {
-        while (Unit* grandowner = (owner ? owner->GetOwner() : nullptr))
-            owner = grandowner;
-    }
-    return owner;
-}
-
-Unit* Unit::GetMaster() const
-{
-    Unit* charmer = GetCharmer();
-    return (charmer ? charmer : GetOwner());
-}
-
-Unit const* Unit::GetBeneficiary() const
-{
-    Unit const* master = GetMaster();
-    return (master ? master : this);
-}
-
-Unit* Unit::GetBeneficiary()
+Unit* Unit::GetBeneficiary() const
 {
     Unit* master = GetMaster();
-    return (master ? master : this);
+    return (master ? master : const_cast<Unit*>(this));
 }
 
-Player const* Unit::GetBeneficiaryPlayer() const
+Player* Unit::GetBeneficiaryPlayer() const
 {
     Unit const* beneficiary = GetBeneficiary();
     if (beneficiary)
-        return (beneficiary->GetTypeId() == TYPEID_PLAYER ? static_cast<Player const*>(beneficiary) : nullptr);
-    return (GetTypeId() == TYPEID_PLAYER ? static_cast<Player const*>(this) : nullptr);
-}
-
-Player* Unit::GetBeneficiaryPlayer()
-{
-    Unit* beneficiary = GetBeneficiary();
-    if (beneficiary)
-        return (beneficiary->GetTypeId() == TYPEID_PLAYER ? static_cast<Player*>(beneficiary) : nullptr);
-    return (GetTypeId() == TYPEID_PLAYER ? static_cast<Player*>(this) : nullptr);
+        return (beneficiary->GetTypeId() == TYPEID_PLAYER ? const_cast<Player*>(static_cast<Player const*>(beneficiary)) : nullptr);
+    return (GetTypeId() == TYPEID_PLAYER ? const_cast<Player*>(static_cast<Player const*>(this)) : nullptr);
 }
 
 Player const* Unit::GetControllingPlayer() const
@@ -5769,31 +5730,202 @@ Player const* Unit::GetControllingClientPlayer() const
     return nullptr;
 }
 
-Unit* Unit::GetSpawner() const
+Unit* Unit::GetCharm(WorldObject const* pov /*= nullptr*/) const
 {
-    if (ObjectGuid guid = GetSpawnerGuid())
-        return ObjectAccessor::GetUnit(*this, guid);
+    if (ObjectGuid const& guid = GetCharmGuid())
+    {
+        WorldObject const* accessor = (pov ? pov : this);
+        if (!accessor->IsInWorld())
+        {
+            // If this is a pet and not placed on any map yet (loading), we have to look for a player within world globally in all maps
+            if (guid.IsPlayer() && accessor->GetTypeId() == TYPEID_UNIT)
+            {
+                if (static_cast<Creature const*>(accessor)->IsPet() && static_cast<Pet const*>(accessor)->isLoading())
+                    return ObjectAccessor::FindPlayer(guid);
+            }
+            // Bugcheck
+            sLog.outDebug("Unit::GetCharm: Guid field management continuity violation for %s, can't look up %s while accessor is outside of the world",
+                          GetObjectGuid().GetString().c_str(), guid.GetString().c_str());
+            return nullptr;
+        }
+        // We need a unit in the same map only
+        if (Unit* unit = accessor->GetMap()->GetUnit(guid))
+            return unit;
+        // Bugcheck
+        sLog.outDebug("Unit::GetCharm: Guid field management continuity violation for %s in map '%s', %s does not exist in this instance",
+                      GetObjectGuid().GetString().c_str(), accessor->GetMap()->GetMapName(), guid.GetString().c_str());
+        // const_cast<Unit*>(this)->SetCharm(nullptr);
+    }
     return nullptr;
 }
 
-Unit* Unit::GetSummoner() const
-{
-    if (ObjectGuid const& guid = GetSummonerGuid())
-        return ObjectAccessor::GetUnit(*this, guid);
-    return nullptr;
-}
-
-Unit* Unit::GetCreator() const
-{
-    if (ObjectGuid const& guid = GetCreatorGuid())
-        return ObjectAccessor::GetUnit(*this, guid);
-    return nullptr;
-}
-
-Unit* Unit::GetCharmer() const
+Unit* Unit::GetCharmer(WorldObject const* pov /*= nullptr*/) const
 {
     if (ObjectGuid const& guid = GetCharmerGuid())
-        return ObjectAccessor::GetUnit(*this, guid);
+    {
+        WorldObject const* accessor = (pov ? pov : this);
+        if (!accessor->IsInWorld())
+        {
+            // If this is a pet and not placed on any map yet (loading), we have to look for a player within world globally in all maps
+            if (guid.IsPlayer() && accessor->GetTypeId() == TYPEID_UNIT)
+            {
+                if (static_cast<Creature const*>(accessor)->IsPet() && static_cast<Pet const*>(accessor)->isLoading())
+                    return ObjectAccessor::FindPlayer(guid);
+            }
+            // Bugcheck
+            sLog.outDebug("Unit::GetCharmer: Guid field management continuity violation for %s, can't look up %s while accessor is outside of the world",
+                          GetObjectGuid().GetString().c_str(), guid.GetString().c_str());
+            return nullptr;
+        }
+        // We need a unit in the same map only
+        if (Unit* unit = accessor->GetMap()->GetUnit(guid))
+            return unit;
+        // Bugcheck
+        sLog.outDebug("Unit::GetCharmer: Guid field management continuity violation for %s in map '%s', %s does not exist in this instance",
+                      GetObjectGuid().GetString().c_str(), accessor->GetMap()->GetMapName(), guid.GetString().c_str());
+        // const_cast<Unit*>(this)->SetCharmer(nullptr);
+    }
+    return nullptr;
+}
+
+Unit* Unit::GetCreator(WorldObject const* pov /*= nullptr*/) const
+{
+    if (ObjectGuid const& guid = GetCreatorGuid())
+    {
+        WorldObject const* accessor = (pov ? pov : this);
+        if (!accessor->IsInWorld())
+        {
+            // If this is a pet and not placed on any map yet (loading), we have to look for a player within world globally in all maps
+            if (guid.IsPlayer() && accessor->GetTypeId() == TYPEID_UNIT)
+            {
+                if (static_cast<Creature const*>(accessor)->IsPet() && static_cast<Pet const*>(accessor)->isLoading())
+                    return ObjectAccessor::FindPlayer(guid);
+            }
+            // Bugcheck
+            sLog.outDebug("Unit::GetCreator: Guid field management continuity violation for %s, can't look up %s while accessor is outside of the world",
+                          GetObjectGuid().GetString().c_str(), guid.GetString().c_str());
+            return nullptr;
+        }
+        // We need a unit in the same map only
+        if (Unit* unit = accessor->GetMap()->GetUnit(guid))
+            return unit;
+        // Bugcheck
+        sLog.outDebug("Unit::GetCreator: Guid field management continuity violation for %s in map '%s', %s does not exist in this instance",
+                      GetObjectGuid().GetString().c_str(), accessor->GetMap()->GetMapName(), guid.GetString().c_str());
+        // const_cast<Unit*>(this)->SetCreator(nullptr);
+    }
+    return nullptr;
+}
+
+Unit* Unit::GetTarget(WorldObject const* pov /*= nullptr*/) const
+{
+    if (ObjectGuid const& guid = GetTargetGuid())
+    {
+        WorldObject const* accessor = (pov ? pov : this);
+        if (!accessor->IsInWorld())
+        {
+            // If this is a pet and not placed on any map yet (loading), we have to look for a player within world globally in all maps
+            if (guid.IsPlayer() && accessor->GetTypeId() == TYPEID_UNIT)
+            {
+                if (static_cast<Creature const*>(accessor)->IsPet() && static_cast<Pet const*>(accessor)->isLoading())
+                    return ObjectAccessor::FindPlayer(guid);
+            }
+            // Bugcheck
+            sLog.outDebug("Unit::GetTarget: Guid field management continuity violation for %s, can't look up %s while accessor is outside of the world",
+                          GetObjectGuid().GetString().c_str(), guid.GetString().c_str());
+            return nullptr;
+        }
+        // We need a unit in the same map only
+        if (Unit* unit = accessor->GetMap()->GetUnit(guid))
+            return unit;
+        // Bugcheck
+        sLog.outDebug("Unit::GetTarget: Guid field management continuity violation for %s in map '%s', %s does not exist in this instance",
+                      GetObjectGuid().GetString().c_str(), accessor->GetMap()->GetMapName(), guid.GetString().c_str());
+        // const_cast<Unit*>(this)->SetTarget(nullptr);
+    }
+    return nullptr;
+}
+
+Unit* Unit::GetChannelObject(WorldObject const* pov /*= nullptr*/) const
+{
+    if (ObjectGuid const& guid = GetChannelObjectGuid())
+    {
+        WorldObject const* accessor = (pov ? pov : this);
+        if (!accessor->IsInWorld())
+        {
+            // If this is a pet and not placed on any map yet (loading), we have to look for a player within world globally in all maps
+            if (guid.IsPlayer() && accessor->GetTypeId() == TYPEID_UNIT)
+            {
+                if (static_cast<Creature const*>(accessor)->IsPet() && static_cast<Pet const*>(accessor)->isLoading())
+                    return ObjectAccessor::FindPlayer(guid);
+            }
+            // Bugcheck
+            sLog.outDebug("Unit::GetChannelObject: Guid field management continuity violation for %s, can't look up %s while accessor is outside of the world",
+                          GetObjectGuid().GetString().c_str(), guid.GetString().c_str());
+            return nullptr;
+        }
+        // We need a unit in the same map only
+        if (Unit* unit = accessor->GetMap()->GetUnit(guid))
+            return unit;
+        // Bugcheck
+        sLog.outDebug("Unit::GetChannelObject: Guid field management continuity violation for %s in map '%s', %s does not exist in this instance",
+                      GetObjectGuid().GetString().c_str(), accessor->GetMap()->GetMapName(), guid.GetString().c_str());
+        // const_cast<Unit*>(this)->SetChannelObject(nullptr);
+    }
+    return nullptr;
+}
+
+Unit* Unit::GetOwner(WorldObject const* pov /*= nullptr*/, bool recursive /*= false*/) const
+{
+    // Default, creator field as owner is present in everything: totems, pets, guardians, etc
+    Unit* owner = GetCreator(pov);
+    // Query owner recursively (ascending)
+    if (recursive)
+    {
+        while (Unit* grandowner = (owner ? owner->GetOwner(pov, recursive) : nullptr))
+            owner = grandowner;
+    }
+    return owner;
+}
+
+Unit* Unit::GetMaster(WorldObject const* pov /*= nullptr*/) const
+{
+    Unit* charmer = GetCharmer(pov);
+    return (charmer ? charmer : GetOwner(pov));
+}
+
+Unit* Unit::GetSpawner(WorldObject const* pov /*= nullptr*/) const
+{
+    if (ObjectGuid const& guid = GetSpawnerGuid())
+    {
+        WorldObject const* accessor = (pov ? pov : this);
+        if (!accessor->IsInWorld())
+        {
+            // If this is a pet and not placed on any map yet (loading), we have to look for a player within world globally in all maps
+            if (guid.IsPlayer() && accessor->GetTypeId() == TYPEID_UNIT)
+            {
+                if (static_cast<Creature const*>(accessor)->IsPet() && static_cast<Pet const*>(accessor)->isLoading())
+                    return ObjectAccessor::FindPlayer(guid);
+            }
+            // Bugcheck
+            sLog.outDebug("Unit::GetSpawner: Guid field management continuity violation for %s, can't look up %s while accessor is outside of the world",
+                          GetObjectGuid().GetString().c_str(), guid.GetString().c_str());
+            return nullptr;
+        }
+        // We need a unit in the same map only
+        if (Unit* unit = accessor->GetMap()->GetUnit(guid))
+            return unit;
+        // Bugcheck
+        sLog.outDebug("Unit::GetSpawner: Guid field management continuity violation for %s in map '%s', %s does not exist in this instance",
+                      GetObjectGuid().GetString().c_str(), accessor->GetMap()->GetMapName(), guid.GetString().c_str());
+    }
+    return nullptr;
+}
+
+Unit* Unit::_GetUnit(ObjectGuid guid) const
+{
+    if (Map* map = GetMap())
+        return map->GetUnit(guid);
     return nullptr;
 }
 
@@ -5816,38 +5948,20 @@ Pet* Unit::_GetPet(ObjectGuid guid) const
     return GetMap()->GetPet(guid);
 }
 
-Unit* Unit::GetCharm() const
+Pet* Unit::GetMiniPet() const
 {
-    if (ObjectGuid charm_guid = GetCharmGuid())
-    {
-        if (Unit* pet = ObjectAccessor::GetUnit(*this, charm_guid))
-            return pet;
+    if (!GetCritterGuid())
+        return nullptr;
 
-        sLog.outError("Unit::GetCharm: Charmed %s not exist.", charm_guid.GetString().c_str());
-        const_cast<Unit*>(this)->SetCharm(nullptr);
-    }
-
-    return nullptr;
+    return GetMap()->GetPet(GetCritterGuid());
 }
 
-void Unit::Uncharm()
+void Unit::RemoveMiniPet()
 {
-    if (Unit* charm = GetCharm())
-    {
-        charm->RemoveSpellsCausingAura(SPELL_AURA_MOD_CHARM);
-        charm->RemoveSpellsCausingAura(SPELL_AURA_MOD_POSSESS);
-        charm->RemoveSpellsCausingAura(SPELL_AURA_MOD_POSSESS_PET);
-    }
-}
-
-void Unit::SetPet(Pet* pet)
-{
-    SetPetGuid(pet ? pet->GetObjectGuid() : ObjectGuid());
-}
-
-void Unit::SetCharm(Unit* pet)
-{
-    SetCharmGuid(pet ? pet->GetObjectGuid() : ObjectGuid());
+    if (Pet* pet = GetMiniPet())
+        pet->Unsummon(PET_SAVE_AS_DELETED, this);
+    else
+        SetCritterGuid(ObjectGuid());
 }
 
 void Unit::AddGuardian(Pet* pet)
@@ -6954,7 +7068,7 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
 
     SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
 
-    if (isCharmed() || (GetTypeId() != TYPEID_PLAYER && ((Creature*)this)->IsPet()))
+    if (HasCharmer() || (GetTypeId() != TYPEID_PLAYER && ((Creature*)this)->IsPet()))
         SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT);
 
     // interrupt all delayed non-combat casts
@@ -6987,7 +7101,7 @@ void Unit::ClearInCombat()
     m_CombatTimer = 0;
     RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
 
-    if (isCharmed() || (GetTypeId() != TYPEID_PLAYER && ((Creature*)this)->IsPet()))
+    if (HasCharmer() || (GetTypeId() != TYPEID_PLAYER && ((Creature*)this)->IsPet()))
         RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT);
 
     if (GetTypeId() == TYPEID_PLAYER)
@@ -7537,7 +7651,10 @@ void Unit::SetDeathState(DeathState s)
     if (s == JUST_DIED)
     {
         RemoveAllAurasOnDeath();
+        BreakCharmOutgoing();
+        BreakCharmIncoming();
         RemoveGuardians();
+        RemoveMiniPet();
         UnsummonAllTotems();
 
         StopMoving(true);
@@ -8484,9 +8601,11 @@ void Unit::RemoveFromWorld()
     // cleanup
     if (IsInWorld())
     {
-        Uncharm();
         RemoveNotOwnTrackedTargetAuras();
+        BreakCharmOutgoing();
+        BreakCharmIncoming();
         RemoveGuardians();
+        RemoveMiniPet();
         RemoveAllGameObjects();
         RemoveAllDynObjects();
         GetViewPoint().Event_RemovedFromWorld();
@@ -8527,7 +8646,7 @@ CharmInfo::CharmInfo(Unit* unit) :
     m_petnumber(0), m_retreating(false), m_stayPosSet(false),
     m_stayPosX(0), m_stayPosY(0), m_stayPosZ(0), m_stayPosO(0),
     m_opener(0), m_openerMinRange(0), m_openerMaxRange(0),
-    m_unitFieldBytes2_1(0)
+    m_unitFieldFlags(0), m_unitFieldBytes2_1(0)
 {
     for (int i = 0; i < CREATURE_MAX_SPELLS; ++i)
         m_charmspells[i].SetActionAndType(0, ACT_DISABLED);
@@ -8549,12 +8668,22 @@ void CharmInfo::SetCharmState(std::string const& ainame /*= "PetAI"*/, bool with
     if (withNewThreatList)
         m_combatData = new CombatData(m_unit);
 
+    // Save specific pre-charm flags
+    // Save entire bytes2_1
     m_unitFieldBytes2_1 = m_unit->GetByteValue(UNIT_FIELD_BYTES_2, 1);
+    // Save select unit flags
+    const uint32 flags = (UNIT_FLAG_PLAYER_CONTROLLED | UNIT_FLAG_IMMUNE_TO_PLAYER | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_PVP);
+    m_unitFieldFlags = (m_unit->GetUInt32Value(UNIT_FIELD_FLAGS) & flags);
 }
 
 void CharmInfo::ResetCharmState()
 {
+    // Restore specific pre-charm flags
+    // Restore entire bytes2_1
     m_unit->SetByteValue(UNIT_FIELD_BYTES_2, 1, m_unitFieldBytes2_1);
+    // Restore select unit flags
+    const uint32 flags = (UNIT_FLAG_PLAYER_CONTROLLED | UNIT_FLAG_IMMUNE_TO_PLAYER | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_PVP);
+    m_unit->SetUInt32Value(UNIT_FIELD_FLAGS, ((m_unit->GetUInt32Value(UNIT_FIELD_FLAGS) & ~flags) | m_unitFieldFlags));
 }
 
 void CharmInfo::InitPetActionBar()
@@ -9027,19 +9156,6 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* pTarget, uint32 procFlag, 
 SpellSchoolMask Unit::GetMeleeDamageSchoolMask() const
 {
     return SPELL_SCHOOL_MASK_NORMAL;
-}
-
-Player* Unit::GetSpellModOwner() const
-{
-    if (GetTypeId() == TYPEID_PLAYER)
-        return (Player*)this;
-    if (((Creature*)this)->IsPet() || ((Creature*)this)->IsTotem())
-    {
-        Unit* owner = GetOwner();
-        if (owner && owner->GetTypeId() == TYPEID_PLAYER)
-            return (Player*)owner;
-    }
-    return nullptr;
 }
 
 ///----------Pet responses methods-----------------
@@ -9696,19 +9812,19 @@ void Unit::RemoveAurasAtMechanicImmunity(uint32 mechMask, uint32 exceptSpellId, 
 
 void Unit::NearTeleportTo(float x, float y, float z, float orientation, bool casting /*= false*/)
 {
-    DisableSpline();
-
     if (GetTypeId() == TYPEID_PLAYER)
-        ((Player*)this)->TeleportTo(GetMapId(), x, y, z, orientation, TELE_TO_NOT_LEAVE_TRANSPORT | TELE_TO_NOT_LEAVE_COMBAT | TELE_TO_NOT_UNSUMMON_PET | (casting ? TELE_TO_SPELL : 0));
+        static_cast<Player*>(this)->TeleportTo(GetMapId(), x, y, z, orientation, TELE_TO_NOT_LEAVE_TRANSPORT | TELE_TO_NOT_LEAVE_COMBAT | TELE_TO_NOT_UNSUMMON_PET | (casting ? TELE_TO_SPELL : 0));
     else
     {
-        Creature* c = (Creature*)this;
+        DisableSpline();
+
+        Creature* c = static_cast<Creature*>(this);
         // Creature relocation acts like instant movement generator, so current generator expects interrupt/reset calls to react properly
         if (!c->GetMotionMaster()->empty())
             if (MovementGenerator* movgen = c->GetMotionMaster()->top())
                 movgen->Interrupt(*c);
 
-        GetMap()->CreatureRelocation((Creature*)this, x, y, z, orientation);
+        GetMap()->CreatureRelocation(c, x, y, z, orientation);
 
         SendHeartBeat();
 
@@ -9742,8 +9858,9 @@ void Unit::SetImmuneToNPC(bool state)
     else
         RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
 
-    // NOTE: Do not propagate on charmed units (intentional for now), charm/uncharm do not handle this
-    CallForAllControlledUnits(SetImmuneToNPCHelper(state), CONTROLLED_PET | CONTROLLED_TOTEMS | CONTROLLED_GUARDIANS);
+    // Do not propagate during charm
+    if (!HasCharmer())
+        CallForAllControlledUnits(SetImmuneToNPCHelper(state), CONTROLLED_PET | CONTROLLED_TOTEMS | CONTROLLED_GUARDIANS | CONTROLLED_CHARM);
 }
 
 struct SetImmuneToPlayerHelper
@@ -9760,8 +9877,9 @@ void Unit::SetImmuneToPlayer(bool state)
     else
         RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
 
-    // NOTE: Do not propagate on charmed units (intentional for now), charm/uncharm do not handle this
-    CallForAllControlledUnits(SetImmuneToPlayerHelper(state), CONTROLLED_PET | CONTROLLED_TOTEMS | CONTROLLED_GUARDIANS);
+    // Do not propagate during charm
+    if (!HasCharmer())
+        CallForAllControlledUnits(SetImmuneToPlayerHelper(state), CONTROLLED_PET | CONTROLLED_TOTEMS | CONTROLLED_GUARDIANS | CONTROLLED_CHARM);
 }
 
 struct SetPvPHelper
@@ -9778,10 +9896,14 @@ void Unit::SetPvP(bool state)
     else
         RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP);
 
-    if (GetTypeId() == TYPEID_PLAYER && ((Player*)this)->GetGroup())
-        ((Player*)this)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_STATUS);
+    // Do not propagate during charm
+    if (!HasCharmer())
+    {
+        if (GetTypeId() == TYPEID_PLAYER && static_cast<Player*>(this)->GetGroup())
+            static_cast<Player*>(this)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_STATUS);
 
-    CallForAllControlledUnits(SetPvPHelper(state), CONTROLLED_PET | CONTROLLED_TOTEMS | CONTROLLED_GUARDIANS | CONTROLLED_CHARM);
+        CallForAllControlledUnits(SetPvPHelper(state), CONTROLLED_PET | CONTROLLED_TOTEMS | CONTROLLED_GUARDIANS | CONTROLLED_CHARM);
+    }
 }
 
 bool Unit::IsPvPFreeForAll() const
@@ -10024,6 +10146,10 @@ void Unit::ForceHealthAndPowerUpdate()
 // This will create a new creature and set the current unit as the controller of that new creature
 Unit* Unit::TakePossessOf(SpellEntry const* spellEntry, uint32 effIdx, float x, float y, float z, float ang)
 {
+    // Possess is a unique advertised charm, another advertised charm already exists: we should get rid of it first
+    if (HasCharm())
+        return nullptr;
+
     int32 const& creatureEntry = spellEntry->EffectMiscValue[effIdx];
     CreatureInfo const* cinfo = ObjectMgr::GetCreatureTemplate(creatureEntry);
     if (!cinfo)
@@ -10073,16 +10199,13 @@ Unit* Unit::TakePossessOf(SpellEntry const* spellEntry, uint32 effIdx, float x, 
     // Give the control to the player
     if (player)
     {
+        player->UnsummonPetTemporaryIfAny();
+
         player->GetCamera().SetView(pCreature);                         // modify camera view to the creature view
         // Force client control (required to function propely)
         player->UpdateClientControl(pCreature, true, true);             // transfer client control to the creature after altering flags
         player->SetMover(pCreature);                                    // set mover so now we know that creature is "moved" by this unit
         player->SendForcedObjectUpdate();                               // we have to update client data here to avoid problem with the "release spirit" windows reappear.
-
-        pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED); // this seem to be needed for controlled creature (else cannot attack neutral creature)
-
-        // player pet is unsumoned while possessing
-        player->UnsummonPetTemporaryIfAny();
     }
 
     // init CharmInfo class that will hold charm data
@@ -10090,6 +10213,18 @@ Unit* Unit::TakePossessOf(SpellEntry const* spellEntry, uint32 effIdx, float x, 
 
     // set temp possess ai (creature will not be able to react by itself)
     charmInfo->SetCharmState("PossessedAI");
+
+    // New flags for the duration of charm need to be set after SetCharmState, gets reset in ResetCharmState
+    if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+        pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
+
+    const bool immunePC = IsImmuneToPlayer();
+    if (pCreature->IsImmuneToPlayer() != immunePC)
+        pCreature->SetImmuneToPlayer(immunePC);
+
+    const bool immuneNPC = IsImmuneToNPC();
+    if (pCreature->IsImmuneToNPC() != immuneNPC)
+        pCreature->SetImmuneToNPC(immuneNPC);
 
     if (player)
     {
@@ -10113,9 +10248,14 @@ Unit* Unit::TakePossessOf(SpellEntry const* spellEntry, uint32 effIdx, float x, 
 
 bool Unit::TakePossessOf(Unit* possessed)
 {
-    Player* player = nullptr;
-    if (GetTypeId() == TYPEID_PLAYER)
-        player = static_cast<Player*>(this);
+    // Possess is a unique advertised charm, another advertised charm already exists: we should get rid of it first
+    if (HasCharm())
+        return false;
+
+    Player* player = (GetTypeId() == TYPEID_PLAYER ? static_cast<Player*>(this) : nullptr);
+
+    if (player && possessed->GetObjectGuid() != GetPetGuid())
+        player->UnsummonPetTemporaryIfAny();
 
     // Update possessed's client control status before altering flags
     if (const Player* controllingClientPlayer = possessed->GetControllingClientPlayer())
@@ -10147,10 +10287,6 @@ bool Unit::TakePossessOf(Unit* possessed)
         possessedCreature->SetWalk(IsWalking(), true);
         charmInfo->SetCharmState("PossessedAI");
         getHostileRefManager().deleteReference(possessedCreature);
-
-        // this seem to be needed for controlled creature (else cannot attack neutral creature)
-        if (player)
-            possessed->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
     }
     else if (possessed->GetTypeId() == TYPEID_PLAYER)
     {
@@ -10162,6 +10298,18 @@ bool Unit::TakePossessOf(Unit* possessed)
             possessedPlayer->setFaction(getFaction());
     }
 
+    // New flags for the duration of charm need to be set after SetCharmState, gets reset in ResetCharmState
+    if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+        possessed->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
+
+    const bool immunePC = IsImmuneToPlayer();
+    if (possessed->IsImmuneToPlayer() != immunePC)
+        possessed->SetImmuneToPlayer(immunePC);
+
+    const bool immuneNPC = IsImmuneToNPC();
+    if (possessed->IsImmuneToNPC() != immuneNPC)
+        possessed->SetImmuneToNPC(immuneNPC);
+
     if (player)
     {
         player->GetCamera().SetView(possessed);
@@ -10170,24 +10318,19 @@ bool Unit::TakePossessOf(Unit* possessed)
         player->SetMover(possessed);
         player->SendForcedObjectUpdate();
 
-        if (possessedCreature)
+        // Unsummon existing pet and initialize pet bar only when not possessing own pet
+        if (possessedCreature && !(possessedCreature->IsPet() && possessedCreature->GetObjectGuid() == GetPetGuid()))
         {
-            if (possessedCreature->IsPet() && possessedCreature->GetObjectGuid() == GetPetGuid())
-            {
-                // possessing own pet, pet bar already initialized
-                return true;
-            }
+            // player pet is unsmumoned while possessing
+            player->UnsummonPetTemporaryIfAny();
+
+            charmInfo->InitPossessCreateSpells();
+            // may not always have AI, when posessing a player for example
+            if (possessed->AI())
+                possessed->AI()->SetReactState(REACT_PASSIVE);
+            charmInfo->SetCommandState(COMMAND_STAY);
+            player->PossessSpellInitialize();
         }
-
-        // player pet is unsmumoned while possessing
-        player->UnsummonPetTemporaryIfAny();
-
-        charmInfo->InitPossessCreateSpells();
-        // may not always have AI, when posessing a player for example
-        if (possessed->AI())
-            possessed->AI()->SetReactState(REACT_PASSIVE);
-        charmInfo->SetCommandState(COMMAND_STAY);
-        player->PossessSpellInitialize();
 
         // Take away client control immediately if we are not supposed to have control at the moment
         if (!player->IsClientControl(possessed))
@@ -10197,17 +10340,12 @@ bool Unit::TakePossessOf(Unit* possessed)
     return true;
 }
 
-bool Unit::TakeCharmOf(Unit* charmed)
+bool Unit::TakeCharmOf(Unit* charmed, bool advertised /*= true*/)
 {
+    Player* charmerPlayer = (GetTypeId() == TYPEID_PLAYER ? static_cast<Player*>(this) : nullptr);
 
-    Player* charmerPlayer = nullptr;
-    if (GetTypeId() == TYPEID_PLAYER)
-    {
-        charmerPlayer = static_cast<Player*>(this);
-
-        // player pet is unsmumoned while possessing
+    if (charmerPlayer && advertised)
         charmerPlayer->UnsummonPetTemporaryIfAny();
-    }
 
     // Update charmed's client control status before altering flags
     if (const Player* controllingClientPlayer = charmed->GetControllingClientPlayer())
@@ -10218,7 +10356,15 @@ bool Unit::TakeCharmOf(Unit* charmed)
     charmed->ClearInCombat();
 
     charmed->SetCharmerGuid(GetObjectGuid());
-    SetCharm(charmed);
+    if (advertised)
+    {
+        // If an advertised charm already exists: offload and overwrite
+        if (const ObjectGuid &charmGuid = GetCharmGuid())
+            m_charmedUnitsPrivate.insert(charmGuid);
+        SetCharmGuid(charmed->GetObjectGuid());
+    }
+    else
+        m_charmedUnitsPrivate.insert(charmed->GetObjectGuid());
 
     CharmInfo* charmInfo = charmed->InitCharmInfo(charmed);
 
@@ -10231,7 +10377,7 @@ bool Unit::TakeCharmOf(Unit* charmed)
             charmedPlayer->setFaction(getFaction());
 
         charmInfo->SetCharmState("PetAI");
-        charmed->SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_SUPPORTABLE | UNIT_BYTE2_FLAG_AURAS); // important have to be after charminfo initialization
+
         //charmedPlayer->SetWalk(IsWalking(), true);
 
         charmInfo->InitCharmCreateSpells();
@@ -10254,11 +10400,8 @@ bool Unit::TakeCharmOf(Unit* charmed)
         charmInfo->SetCommandState(COMMAND_FOLLOW);
         charmInfo->SetIsRetreating(true);
 
-        if (charmerPlayer)
+        if (charmerPlayer && advertised)
         {
-            // without this charmed unit will not be able to attack neutral target
-            charmed->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
-
             if (getClass() == CLASS_WARLOCK)
             {
                 CreatureInfo const* cinfo = charmedCreature->GetCreatureInfo();
@@ -10284,57 +10427,138 @@ bool Unit::TakeCharmOf(Unit* charmed)
         }
     }
 
-    if (charmerPlayer)
+    // New flags for the duration of charm need to be set after SetCharmState, gets reset in ResetCharmState
+    if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+        charmed->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
+
+    const bool immunePC = IsImmuneToPlayer();
+    if (charmed->IsImmuneToPlayer() != immunePC)
+        charmed->SetImmuneToPlayer(immunePC);
+
+    const bool immuneNPC = IsImmuneToNPC();
+    if (charmed->IsImmuneToNPC() != immuneNPC)
+        charmed->SetImmuneToNPC(immuneNPC);
+
+    if (charmerPlayer && advertised)
         charmerPlayer->CharmSpellInitialize();
 
     return true;
 }
 
-void Unit::ResetControlState(bool attackCharmer /*= true*/)
+void Unit::BreakCharmOutgoing(Unit* charmed)
 {
-    Player* player = nullptr;
-    if (GetTypeId() == TYPEID_PLAYER)
-        player = static_cast<Player*>(this);
+    // Cache our own guid
+    const ObjectGuid &guid = GetObjectGuid();
 
-    Unit* possessed = GetCharm();
-
-    if (!possessed)
+    // Verify charmed with self as a charmer
+    if (charmed && charmed->HasCharmer(guid))
     {
-        if (player)
-        {
-            player->GetCamera().ResetView();
-            player->UpdateClientControl(player, true);
-            player->SetMover(nullptr);
-            player->ForceHealAndPowerUpdateInZone();
-        }
-        return;
-    }
+        // Break any aura-based charm spells on the charmed unit placed by self
+        charmed->RemoveSpellsCausingAura(SPELL_AURA_MOD_POSSESS, guid);
+        charmed->RemoveSpellsCausingAura(SPELL_AURA_MOD_CHARM, guid);
+        charmed->RemoveSpellsCausingAura(SPELL_AURA_MOD_POSSESS_PET, guid);
+        charmed->RemoveSpellsCausingAura(SPELL_AURA_AOE_CHARM, guid);
 
-    possessed->clearUnitState(UNIT_STAT_POSSESSED);
-    possessed->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_POSSESSED);
-    possessed->SetCharmerGuid(ObjectGuid());
+        // Re-check: if still charmed after aura removal attempt - likely non-aura charm (summon charmed for example)
+        if (charmed->HasCharmer(guid))
+            Uncharm(charmed);
+
+        if (charmed->GetSpawnerGuid() == guid)
+        {
+            // Looks like a charmed temporary summon, possibly summoned by a linked specific aura, try removing
+            if (uint32 spellid = charmed->GetUInt32Value(UNIT_CREATED_BY_SPELL))
+                RemoveAurasDueToSpell(spellid);
+        }
+    }
+}
+
+void Unit::BreakCharmOutgoing(bool advertisedOnly /*= false*/)
+{
+    // Always break charm on the unit advertised in own charm field
+    BreakCharmOutgoing(GetCharm());
+
+    // If set, do not break non-advertised charms (such as aoe charms)
+    if (advertisedOnly)
+        return;
+
+    // Proceed breaking the rest of charms
+    if (Map* map = GetMap())
+    {
+        while (!m_charmedUnitsPrivate.empty())
+        {
+            const ObjectGuid &guid = (*m_charmedUnitsPrivate.begin());
+
+            if (Unit* unit = map->GetUnit(guid))
+                // Erase is performed further down the line
+                BreakCharmOutgoing(unit);
+            else
+                // Erase it from the container if somehow does not exist / is inaccesible anymore
+                m_charmedUnitsPrivate.erase(guid);
+        }
+    }
+}
+
+void Unit::BreakCharmIncoming()
+{
+    if (Unit* charmer = GetCharmer())
+        charmer->BreakCharmOutgoing(this);
+}
+
+void Unit::Uncharm(Unit* charmed)
+{
+    Player* player = (GetTypeId() == TYPEID_PLAYER ? static_cast<Player*>(this) : nullptr);
+
+    // Charmed unit should exist and be charmed by us
+    if (!charmed || !charmed->HasCharmer(GetObjectGuid()))
+        return;
+
+    // Cache the guid of the charmed unit
+    const ObjectGuid charmedGuid = charmed->GetObjectGuid();
+
+    // Detect if the charm is the possessing charm
+    const bool possess = charmed->hasUnitState(UNIT_STAT_POSSESSED);
+
+    // Detect if this charm is advertised in own charm field (public) or a private one
+    const bool advertised = HasCharm(charmedGuid);
+
+    if (possess)
+    {
+        charmed->clearUnitState(UNIT_STAT_POSSESSED);
+        charmed->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_POSSESSED);
+            player->ForceHealAndPowerUpdateInZone();
+    }
+    charmed->SetCharmerGuid(ObjectGuid());
+    if (advertised)
+        SetCharmGuid(ObjectGuid());
+    else
+        m_charmedUnitsPrivate.erase(charmedGuid);
 
     // may be not correct we have to remove only some generator taking account of the current situation
-    possessed->StopMoving(true);
-    possessed->GetMotionMaster()->Clear();
+    charmed->StopMoving(true);
+    charmed->GetMotionMaster()->Clear();
 
-    SetCharmGuid(ObjectGuid());
-    Creature* possessedCreature = nullptr;
-    CharmInfo* charmInfo = possessed->GetCharmInfo();
+    Creature* charmedCreature = nullptr;
+    CharmInfo* charmInfo = charmed->GetCharmInfo();
 
-    if (possessed->GetTypeId() == TYPEID_UNIT)
+    if (charmed->GetTypeId() == TYPEID_UNIT)
     {
         // now we have to clean threat list to be able to restore normal creature behavior
-        FactionTemplateEntry const* factionEntry = possessed->getFactionTemplateEntry();
+        FactionTemplateEntry const* factionEntry = charmed->getFactionTemplateEntry();
 
-        possessedCreature = static_cast<Creature*>(possessed);
-        if (!possessedCreature->IsPet())
+        charmedCreature = static_cast<Creature*>(charmed);
+        if (!charmedCreature->IsPet())
         {
-            possessedCreature->ClearTemporaryFaction();
+            charmedCreature->ClearTemporaryFaction();
+
+            charmed->AttackStop(true, true);
+            charmed->m_Events.KillAllEvents(true);
+
+            charmInfo->ResetCharmState();
+            charmed->DeleteCharmInfo();
 
             // first find friendly target (stopping combat here is not recommended because m_attackers will be modified)
             AttackerSet friendlyTargets;
-            for (Unit::AttackerSet::const_iterator itr = possessed->getAttackers().begin(); itr != possessed->getAttackers().end(); ++itr)
+            for (Unit::AttackerSet::const_iterator itr = charmed->getAttackers().begin(); itr != charmed->getAttackers().end(); ++itr)
             {
                 Unit* attacker = (*itr);
                 if (attacker->GetTypeId() != TYPEID_UNIT)
@@ -10350,84 +10574,79 @@ void Unit::ResetControlState(bool attackCharmer /*= true*/)
                 Unit* attacker = (*itr);
                 attacker->AttackStop(true, true);
                 attacker->m_Events.KillAllEvents(true);
-                attacker->getThreatManager().modifyThreatPercent(possessed, -101);     // only remove the possessed creature from threat list because it can be filled by other players
+                attacker->getThreatManager().modifyThreatPercent(charmed, -101);     // only remove the possessed creature from threat list because it can be filled by other players
                 attacker->AddThreat(this);
             }
 
-            possessed->AttackStop(true, true);
-            possessed->m_Events.KillAllEvents(true);
-
-            charmInfo->ResetCharmState();
-            possessed->DeleteCharmInfo();
-
             // we have to restore initial MotionMaster
-            while (possessed->GetMotionMaster()->GetCurrentMovementGeneratorType() == FOLLOW_MOTION_TYPE)
-                possessed->GetMotionMaster()->MovementExpired(true);
+            while (charmed->GetMotionMaster()->GetCurrentMovementGeneratorType() == FOLLOW_MOTION_TYPE)
+                charmed->GetMotionMaster()->MovementExpired(true);
 
-            if (possessed->isAlive())
+            if (charmed->isAlive())
             {
-                possessedCreature->SetCombatStartPosition(GetPositionX(), GetPositionY(), GetPositionZ()); // needed for creature not yet entered in combat or SelectHostileTarget() will fail
+                charmedCreature->SetCombatStartPosition(GetPositionX(), GetPositionY(), GetPositionZ()); // needed for creature not yet entered in combat or SelectHostileTarget() will fail
 
                 // TODO:: iam not sure we need that faction check
                 if (!factionEntry->IsFriendlyTo(*getFactionTemplateEntry()))
-                    possessed->getThreatManager().addThreat(this, GetMaxHealth());     // generating threat by max life amount best way i found to make it realistic
+                    charmed->getThreatManager().addThreat(this, GetMaxHealth());     // generating threat by max life amount best way i found to make it realistic
             }
             else
-                possessed->GetCombatData()->threatManager.clearReferences();
-
-            // we can remove that flag if its set, that is supposed to be only for creature controlled by player
-            // however player's pet should keep it
-            possessed->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
+                charmed->GetCombatData()->threatManager.clearReferences();
         }
         else
         {
-            possessed->setFaction(possessedCreature->GetOwner()->getFaction());
+            charmed->setFaction(charmedCreature->GetOwner()->getFaction());
 
             charmInfo->ResetCharmState();
 
             // as possessed is a pet we have to restore original charminfo so Pet::DeleteCharmInfo will take care of that
-            possessed->DeleteCharmInfo();
+            charmed->DeleteCharmInfo();
         }
     }
-    else if (possessed->GetTypeId() == TYPEID_PLAYER)
+    else if (charmed->GetTypeId() == TYPEID_PLAYER)
     {
-        possessed->AttackStop(true, true);
+        charmed->AttackStop(true, true);
 
-        Player* possessedPlayer = static_cast<Player*>(possessed);
+        Player* charmedPlayer = static_cast<Player*>(charmed);
 
-        if (player && player->IsInDuelWith(possessedPlayer))
-            possessedPlayer->SetUInt32Value(PLAYER_DUEL_TEAM, player->GetUInt32Value(PLAYER_DUEL_TEAM) == 1 ? 2 : 1);
+        if (player && player->IsInDuelWith(charmedPlayer))
+            charmedPlayer->SetUInt32Value(PLAYER_DUEL_TEAM, player->GetUInt32Value(PLAYER_DUEL_TEAM) == 1 ? 2 : 1);
         else
-            possessedPlayer->setFactionForRace(possessedPlayer->getRace());
+            charmedPlayer->setFactionForRace(charmedPlayer->getRace());
 
         charmInfo->ResetCharmState();
-        possessedPlayer->DeleteCharmInfo();
+        charmedPlayer->DeleteCharmInfo();
 
-        possessedPlayer->ForceHealAndPowerUpdateInZone();
+        charmedPlayer->ForceHealAndPowerUpdateInZone();
 
-        while (possessedPlayer->GetMotionMaster()->GetCurrentMovementGeneratorType() == FOLLOW_MOTION_TYPE)
-            possessedPlayer->GetMotionMaster()->MovementExpired(true);
+        while (charmedPlayer->GetMotionMaster()->GetCurrentMovementGeneratorType() == FOLLOW_MOTION_TYPE)
+            charmedPlayer->GetMotionMaster()->MovementExpired(true);
     }
 
     // Update possessed's client control status after altering flags
-    if (const Player* controllingClientPlayer = possessed->GetControllingClientPlayer())
-        controllingClientPlayer->UpdateClientControl(possessed, true);
+    if (const Player* controllingClientPlayer = charmed->GetControllingClientPlayer())
+        controllingClientPlayer->UpdateClientControl(charmed, true);
 
     if (player)
     {
-        player->UpdateClientControl(possessed, false);
-        player->SetMover(nullptr);
-        player->GetCamera().ResetView();
+        if (possess)
+        {
+            player->GetCamera().ResetView();
+            player->UpdateClientControl(charmed, false);
+            player->SetMover(player);
+        }
 
-        // player pet can be re summoned here
-        player->ResummonPetTemporaryUnSummonedIfAny();
+        // Player pet can be re-summoned here
+        if (advertised)
+        {
+            player->ResummonPetTemporaryUnSummonedIfAny();
 
-        // remove pet bar only if no pet
-        if (!player->GetPet())
-            player->RemovePetActionBar();
-        else
-            player->PetSpellInitialize();   // reset spell on pet bar
-
+            // remove pet bar only if no pet
+            if (!player->GetPet())
+                player->RemovePetActionBar();
+            else
+                player->PetSpellInitialize();   // reset spell on pet bar
+        }
         player->ForceHealAndPowerUpdateInZone();
     }
 
