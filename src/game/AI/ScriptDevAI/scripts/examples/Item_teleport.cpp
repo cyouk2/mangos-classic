@@ -199,27 +199,27 @@ bool GossipSelect_ItemUse_Item_teleport(Player *player, Item *_Item, uint32 send
             switch(action) {
                 // [14] 怒焰裂谷 统一格式说明：(MapID, X, Y, Z, 0);
                 case GOSSIP_ACTION_INFO_DEF + 1 :
-                    player->TeleportTo(389,2.024650,-10.021000,-16.187500,0);
+                    player->TeleportTo(389,2.024650f,-10.021000f,-16.187500f,0);
                     break;
                 // [19] 死亡矿井
                 case GOSSIP_ACTION_INFO_DEF + 2 :
-                    player->TeleportTo(36,-16.4,-383.07,61.78,0);
+                    player->TeleportTo(36,-16.4f,-383.07f,61.78f,0);
                     break;
                 // [22] 哀嚎洞穴
                 case GOSSIP_ACTION_INFO_DEF + 3 :
-                    player->TeleportTo(43,-161.841995,133.266998,-73.866203,0);
+                    player->TeleportTo(43,-161.841995f,133.266998f,-73.866203f,0);
                     break;
                 // [24] 影牙城堡
                 case GOSSIP_ACTION_INFO_DEF + 4 :
-                    player->TeleportTo(33,-228.19,2110.56,76.89,0);
+                    player->TeleportTo(33,-228.19f,2110.56f,76.89f,0);
                     break;
                 // [26] 黑暗深渊
                 case GOSSIP_ACTION_INFO_DEF + 5 :
-                    player->TeleportTo(48,-150.367004,102.995003,-40.555801,0);
+                    player->TeleportTo(48,-150.367004f,102.995003f,-40.555801f,0);
                     break;
                 // [27] 暴风城监狱
                 case GOSSIP_ACTION_INFO_DEF + 6 :
-                    player->TeleportTo(34,48.29,0.45,-16.14,0);
+                    player->TeleportTo(34,48.29f,0.45f,-16.14f,0);
                     break;
                 // [31] 剃刀沼泽
                 case GOSSIP_ACTION_INFO_DEF + 7 :
@@ -227,19 +227,19 @@ bool GossipSelect_ItemUse_Item_teleport(Player *player, Item *_Item, uint32 send
                     break;
                 // [33] 诺莫瑞根
                 case GOSSIP_ACTION_INFO_DEF + 8 :
-                    player->TeleportTo(90,-332.562988,-3.445,-152.845993,0);
+                    player->TeleportTo(90,-332.562988f,-3.445f,-152.845993f,0);
                     break;
                 // [40] 血色修道院
                 case GOSSIP_ACTION_INFO_DEF + 9 :
-                    player->TeleportTo(189,855.903992,1321.939941,18.673000,0);
+                    player->TeleportTo(189,855.903992f,1321.939941f,18.673000f,0);
                     break;
                 // [42] 剃刀高地
                 case GOSSIP_ACTION_INFO_DEF + 10 :
-                    player->TeleportTo(129,2593.209961,1109.459961,51.093300,0);
+                    player->TeleportTo(129,2593.209961f,1109.459961f,51.093300f,0);
                     break;
                 // [45] 奥达曼
                 case GOSSIP_ACTION_INFO_DEF + 11 :
-                    player->TeleportTo(70,-227.529007,45.009800,-46.019600,0);
+                    player->TeleportTo(70,-227.529007f,45.009800f,-46.019600f,0);
                     break;
             }
             player->CLOSE_GOSSIP_MENU();
@@ -249,19 +249,19 @@ bool GossipSelect_ItemUse_Item_teleport(Player *player, Item *_Item, uint32 send
             switch(action) {
                 // [46] 祖尔法拉克 统一格式说明：(MapID, X, Y, Z, 0);
                 case GOSSIP_ACTION_INFO_DEF + 1 :
-                    player->TeleportTo(209,1213,841,8.9,0);
+                    player->TeleportTo(209,1213,841,8.9f,0);
                     break;
                 // [49] 玛拉顿
                 case GOSSIP_ACTION_INFO_DEF + 2 :
-                    player->TeleportTo(349,1012.700012,-459.317993,-43.547100,0);
+                    player->TeleportTo(349,1012.700012f,-459.317993f,-43.547100f,0);
                     break;
                 // [53] 失落的神庙
                 case GOSSIP_ACTION_INFO_DEF + 3 :
-                    player->TeleportTo(109,-313.369995,99.955399,-131.848999,0);
+                    player->TeleportTo(109,-313.369995f,99.955399f,-131.848999f,0);
                     break;
                 // [57] 黑石深渊
                 case GOSSIP_ACTION_INFO_DEF + 4 :
-                    player->TeleportTo(230,456.928986,34.927700,-69.388100,0);
+                    player->TeleportTo(230,456.928986f,34.927700f,-69.388100f,0);
                     break;
                 // [60] 通灵学院
                 case GOSSIP_ACTION_INFO_DEF + 5 :
@@ -269,15 +269,15 @@ bool GossipSelect_ItemUse_Item_teleport(Player *player, Item *_Item, uint32 send
                     break;
                 // [60] 厄运之槌 (北区)
                 case GOSSIP_ACTION_INFO_DEF + 6 :
-                    player->TeleportTo(429,255.164001,-17.024200,-2.560600,0);
+                    player->TeleportTo(429,255.164001f,-17.024200f,-2.560600f,0);
                     break;
                 // [60] 厄运之槌 (东区)
                 case GOSSIP_ACTION_INFO_DEF + 7 :
-                    player->TeleportTo(429,46.24,-155.53,-2.71349,0);
+                    player->TeleportTo(429,46.24f,-155.53f,-2.71349f,0);
                     break;
                 // [60] 厄运之槌 (西区)
                 case GOSSIP_ACTION_INFO_DEF + 8 :
-                    player->TeleportTo(429,32.722599,159.417007,-3.470170,0);
+                    player->TeleportTo(429,32.722599f,159.417007f,-3.470170f,0);
                     break;
                 // [60] 斯坦索姆
                 case GOSSIP_ACTION_INFO_DEF + 9 :
@@ -285,7 +285,7 @@ bool GossipSelect_ItemUse_Item_teleport(Player *player, Item *_Item, uint32 send
                     break;
                 // [60] 黑石塔下
                 case GOSSIP_ACTION_INFO_DEF + 10 :
-                    player->TeleportTo(229,78.19,-227.63,49.72,0);
+                    player->TeleportTo(229,78.19f,-227.63f,49.72f,0);
                     break;
             }
             player->CLOSE_GOSSIP_MENU();
@@ -296,39 +296,39 @@ bool GossipSelect_ItemUse_Item_teleport(Player *player, Item *_Item, uint32 send
             switch(action) {
                 // [团] 溶火之心 统一格式说明：(MapID, X, Y, Z, 0);
                 case GOSSIP_ACTION_INFO_DEF + 1 :
-                    player->TeleportTo(409,1089.601685,-470.190247,-106.413055,0);
+                    player->TeleportTo(409,1089.601685f,-470.190247f,-106.413055f,0);
                     break;
                 // [团] 黑石塔上
                 case GOSSIP_ACTION_INFO_DEF + 2 :
-                    player->TeleportTo(229,78.339836,-227.793518,49.7103,0);
+                    player->TeleportTo(229,78.339836f,-227.793518f,49.7103f,0);
                     break;
                 // [团] 祖尔格拉布
                 case GOSSIP_ACTION_INFO_DEF + 3 :
-                    player->TeleportTo(309,-11916,-1251.469971,92.32,0);
+                    player->TeleportTo(309,-11916f,-1251.469971f,92.32f,0);
                     break;
                 // [团] 黑翼之巢
                 case GOSSIP_ACTION_INFO_DEF + 4 :
-                    player->TeleportTo(469,-7674.470215,-1108.380005,396.649994,0);
+                    player->TeleportTo(469,-7674.470215f,-1108.380005f,396.649994f,0);
                     break;
                 // [团] 安其拉
                 case GOSSIP_ACTION_INFO_DEF + 5 :
-                    player->TeleportTo(531,-8212.002930,2034.474854,129.141342,0);
+                    player->TeleportTo(531,-8212.002930f,2034.474854f,129.141342f,0);
                     break;
                 // [团] 安其拉废墟
                 case GOSSIP_ACTION_INFO_DEF + 6 :
-                    player->TeleportTo(509,-8443.475586,1518.648560,31.906958,0);
+                    player->TeleportTo(509,-8443.475586f,1518.648560f,31.906958f,0);
                     break;
                 // [团] 奥妮克希亚的巢穴
                 case GOSSIP_ACTION_INFO_DEF + 7 :
-                    player->TeleportTo(249,30.010290,-58.840508,-5.325367,0);
+                    player->TeleportTo(249,30.010290f,-58.840508f,-5.325367f,0);
                     break;
                 //[团] 纳克萨玛斯 
                 case GOSSIP_ACTION_INFO_DEF + 8 :
-                    player->TeleportTo(533,3005.87,-3435.01,293.882,0);
+                    player->TeleportTo(533,3005.87f,-3435.01f,293.882f,0);
                     break;
                 // [团] 冰龙巢穴
                 case GOSSIP_ACTION_INFO_DEF + 9 :
-                    player->TeleportTo(533,3700.35,-5185.92,143.957,4.403038,0);
+                    player->TeleportTo(533,3700.35f,-5185.92f,143.957f,4.403038f,0);
                     break;
             }
             player->CLOSE_GOSSIP_MENU();
@@ -338,27 +338,27 @@ bool GossipSelect_ItemUse_Item_teleport(Player *player, Item *_Item, uint32 send
             switch(action) {
                 // 暮色森林 统一格式说明：(MapID, X, Y, Z, 0);
                 case GOSSIP_ACTION_INFO_DEF + 1 :
-                    player->TeleportTo(0,-10526.168945,-434.996796,50.894821,0);
+                    player->TeleportTo(0,-10526.168945f,-434.996796f,50.894821f,0);
                     break;
                 // 辛特兰
                 case GOSSIP_ACTION_INFO_DEF + 2 :
-                    player->TeleportTo(0,759.605713,-3893.341309,116.475304,0);
+                    player->TeleportTo(0,759.605713f,-3893.341309f,116.475304f,0);
                     break;
                 // 灰谷
                 case GOSSIP_ACTION_INFO_DEF + 3 :
-                    player->TeleportTo(1,3120.289307,-3439.444336,139.566345,1);
+                    player->TeleportTo(1,3120.289307f,-3439.444336f,139.566345f,1);
                     break;
                 //  艾萨拉
                 case GOSSIP_ACTION_INFO_DEF + 4 :
-                    player->TeleportTo(1,2622.219971,-5977.930176,100.562897,1);
+                    player->TeleportTo(1,2622.219971f,-5977.930176f,100.562897f,1);
                     break;
                 // 菲拉斯
                 case GOSSIP_ACTION_INFO_DEF + 5 :
-                    player->TeleportTo(1,-2741.290039,2009.481323,31.877323,1);
+                    player->TeleportTo(1,-2741.290039f,2009.481323f,31.877323f,1);
                     break;
                 // 诅咒之地
                 case GOSSIP_ACTION_INFO_DEF + 6 :
-                    player->TeleportTo(0,-12234.000000,-2474.000000,-3.000000,0);
+                    player->TeleportTo(0,-12234.000000f,-2474.000000f,-3.000000f,0);
                     break;
             }
             player->CLOSE_GOSSIP_MENU();
@@ -367,35 +367,35 @@ bool GossipSelect_ItemUse_Item_teleport(Player *player, Item *_Item, uint32 send
             switch(action) {
                 //海加爾山 統一格式?明：(MapID, X, Y, Z, 0);
                 case GOSSIP_ACTION_INFO_DEF + 1 :
-                    player->TeleportTo(1,4603.946777,-3879.250977,944.183472,1);
+                    player->TeleportTo(1,4603.946777f,-3879.250977f,944.183472f,1);
                     break;
                 //翡翠聖地 統一格式?明：(MapID, X, Y, Z, 0);
                 case GOSSIP_ACTION_INFO_DEF + 2 :
-                    player->TeleportTo(1,3968.264648,-1290.036011,240.326889,5.927989);
+                    player->TeleportTo(1,3968.264648f,-1290.036011f,240.326889f,5.927989f);
                     break;
                 //時光之穴 統一格式?明：(MapID, X, Y, Z, 0);
                 case GOSSIP_ACTION_INFO_DEF + 3 :
-                    player->TeleportTo(1,-8173.930176,-4737.463867,33.777351,4.772119);
+                    player->TeleportTo(1,-8173.930176f,-4737.463867f,33.777351f,4.772119f);
                     break;
                 //黑暗之門 統一格式?明：(MapID, X, Y, Z, 0);
                 case GOSSIP_ACTION_INFO_DEF + 4 :
-                    player->TeleportTo(0,-11849.031250,-3201.170654,-28.885090,3.280838);
+                    player->TeleportTo(0,-11849.031250f,-3201.170654f,-28.885090f,3.280838f);
                     break;
                 //雙塔山 統一格式?明：(MapID, X, Y, Z, 0);
                 case GOSSIP_ACTION_INFO_DEF + 5 :
-                    player->TeleportTo(1,-3331.353271,2225.728271,30.987701,6.267522);
+                    player->TeleportTo(1,-3331.353271f,2225.728271f,30.987701f,6.267522f);
                     break;
                 //夢境之樹 統一格式?明：(MapID, X, Y, Z, 0);
                 case GOSSIP_ACTION_INFO_DEF + 6 :
-                    player->TeleportTo(1,-2914.756104,1902.199341,34.741035,5.690404);
+                    player->TeleportTo(1,-2914.756104f,1902.199341f,34.741035f,5.690404f);
                     break;
                 //GM之島 統一格式?明：(MapID, X, Y, Z, 0);
                 case GOSSIP_ACTION_INFO_DEF + 7 :
-                    player->TeleportTo(1, 16222.1 ,16252.1,12.5872,1);
+                    player->TeleportTo(1, 16222.1f,16252.1f,12.5872f,1);
                     break;
                 //暴雪建設公司路障 統一格式?明：(MapID, X, Y, Z, 0);
                 case GOSSIP_ACTION_INFO_DEF + 8 :
-                    player->TeleportTo(1,5478.060059,-3730.850098,1593.439941,5.610376);
+                    player->TeleportTo(1,5478.060059f,-3730.850098f,1593.439941f,5.610376f);
                     break;
             }
             player->CLOSE_GOSSIP_MENU();
@@ -404,27 +404,27 @@ bool GossipSelect_ItemUse_Item_teleport(Player *player, Item *_Item, uint32 send
             switch(action) {
                 //天涯海灘 統一格式?明：(MapID, X, Y, Z, 0);
                 case GOSSIP_ACTION_INFO_DEF + 1 :
-                    player->TeleportTo(1,-9851.617188,-3608.474121,8.939731,2.513388);
+                    player->TeleportTo(1,-9851.617188f,-3608.474121f,8.939731f,2.513388f);
                     break;
                 //安戈洛環形山 統一格式?明：(MapID, X, Y, Z, 0);
                 case GOSSIP_ACTION_INFO_DEF + 2 :
-                    player->TeleportTo(1,-8562.096680,-2106.056641,8.852538,0.090425);
+                    player->TeleportTo(1,-8562.096680f,-2106.056641f,8.852538f,0.090425f);
                     break;
                 //比吉爾的飛艇殘骸 統一格式?明：(MapID, X, Y, Z, 0);
                 case GOSSIP_ACTION_INFO_DEF + 3 :
-                    player->TeleportTo(1,-4014.003418,-3768.186523,42.123295,5.220697);
+                    player->TeleportTo(1,-4014.003418f,-3768.186523f,42.123295f,5.220697f);
                     break;
                 //石堡瀑布 統一格式?明：(MapID, X, Y, Z, 0);
                 case GOSSIP_ACTION_INFO_DEF + 4 :
-                    player->TeleportTo(0,-9481.493164,-3326.915283,8.864347,0.846896);
+                    player->TeleportTo(0,-9481.493164f,-3326.915283f,8.864347f,0.846896f);
                     break;
                 //地鐵海底
                 case GOSSIP_ACTION_INFO_DEF + 5 :
-                    player->TeleportTo(369, -9.96166,1238.17,-126.102,0);
+                    player->TeleportTo(369, -9.96166f,1238.17f,-126.102f,0);
                     break;
                 //工程師之島
                 case GOSSIP_ACTION_INFO_DEF + 6 :
-                    player->TeleportTo(451, 16299.464844, 16272.843750, 69.443901 ,0);
+                    player->TeleportTo(451, 16299.464844f, 16272.843750f, 69.443901f,0);
                     break;
             }
             player->CLOSE_GOSSIP_MENU();
