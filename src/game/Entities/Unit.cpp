@@ -9291,8 +9291,8 @@ void Unit::SetIncapacitatedState(bool apply, uint32 state, ObjectGuid casterGuid
         return;
 
     const bool movement = (state != UNIT_FLAG_STUNNED);
-    const bool stun = (state & UNIT_FLAG_STUNNED);
-    const bool fleeing = (state & UNIT_FLAG_FLEEING);
+    const bool stun = (state & UNIT_FLAG_STUNNED) != 0;
+    const bool fleeing = (state & UNIT_FLAG_FLEEING) != 0;
 
     if (apply)
     {
