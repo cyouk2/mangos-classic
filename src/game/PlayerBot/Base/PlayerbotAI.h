@@ -517,7 +517,7 @@ class MANGOS_DLL_SPEC PlayerbotAI
         void DoFlight();
         void GetTaxi(ObjectGuid guid, BotTaxiNode& nodes);
 
-        bool HasCollectFlag(uint8 flag) { return m_collectionFlags & flag; }
+        bool HasCollectFlag(uint8 flag) { return (m_collectionFlags & flag) != 0; }
         void SetCollectFlag(uint8 flag)
         {
             if (HasCollectFlag(flag)) m_collectionFlags &= ~flag;
