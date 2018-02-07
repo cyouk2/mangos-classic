@@ -546,7 +546,7 @@ bool PlayerbotPriestAI::CastHoTOnTank()
 
     // Priest HoTs: Renew, Penance (with talents, channeled)
     if (RENEW && m_ai->In_Reach(m_ai->GetGroupTank(), RENEW))
-        return (RETURN_CONTINUE & CastSpell(RENEW, m_ai->GetGroupTank()));
+        return (RETURN_CONTINUE & CastSpell(RENEW, m_ai->GetGroupTank())) != 0;
 
     return false;
 }
