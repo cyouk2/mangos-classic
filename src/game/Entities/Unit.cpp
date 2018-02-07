@@ -2819,7 +2819,7 @@ uint32 Unit::CalculateGlanceAmount(CalcDamageInfo* meleeInfo) const
     if (difference < 0)
         return meleeInfo->totalDamage;
     // calculate base values and mods
-    const bool caster = (getClassMask() & CLASSMASK_WAND_USERS);
+    const bool caster = (getClassMask() & CLASSMASK_WAND_USERS) !=0;
     const float baseHighEnd = (caster ? 0.9f : 1.2f);
     const float baseLowEnd = (caster ? 0.6f : 1.3f);
     const float maxLowEnd = (caster ? 0.6f : 0.91f);
