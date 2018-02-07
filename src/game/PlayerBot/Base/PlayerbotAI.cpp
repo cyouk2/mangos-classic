@@ -5202,7 +5202,7 @@ bool PlayerbotAI::CanStore()
                 totalfree =  totalfree + pBag->GetFreeSlots();
         }
     }
-    return totalfree;
+    return totalfree != 0;
 }
 
 // use item on self
