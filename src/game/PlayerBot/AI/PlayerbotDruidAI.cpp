@@ -730,7 +730,7 @@ bool PlayerbotDruidAI::CastHoTOnTank()
 
     // Druid HoTs: Rejuvenation, Regrowth, Tranquility (channeled, AoE)
     if (REJUVENATION)
-        return (RETURN_CONTINUE & CastSpell(REJUVENATION, m_ai->GetGroupTank()));
+        return (RETURN_CONTINUE & CastSpell(REJUVENATION, m_ai->GetGroupTank())) != 0;
 
     return false;
 }
