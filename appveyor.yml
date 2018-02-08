@@ -17,7 +17,7 @@ environment:
   BOOST_LIBRARYDIR_WIN64: C:\Libraries\boost_1_63_0\lib64-msvc-14.0
   SNAPSHOT_TAG: "Last_$(APPVEYOR_PROJECT_NAME)_PreBuild"
   SEC_ACCESS_TOKEN:
-        secure: 46ed1eba3cf2964c5782b8f4600a3696cb57f913
+        secure: c3ddd35a25b1e6e811aaa4e5d44187fd93319ef0
 
 # build configuration, i.e. Debug, Release, etc.
 configuration:
